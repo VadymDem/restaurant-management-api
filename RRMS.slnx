@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RRMS.Api/RRMS.Api.csproj" />
+    <Project Path="src/RRMS.Application/RRMS.Application.csproj" />
+    <Project Path="src/RRMS.Domain/RRMS.Domain.csproj" />
+    <Project Path="src/RRMS.Infrastructure/RRMS.Infrastructure.csproj" />
+  </Folder>
+</Solution>

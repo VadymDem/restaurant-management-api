@@ -1,0 +1,25 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.suo
+*.userosscache
+
+# EF Core migrations history
+*.db
+
+# Environment / secrets
+.env
+*.env
+appsettings.Local.json
+
+# OS
+Thumbs.db
+.DS_Store
