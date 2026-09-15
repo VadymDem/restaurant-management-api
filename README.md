@@ -39,17 +39,17 @@ RRMS.Api ──► RRMS.Application ──► RRMS.Domain
 
 Core entities and shared constants. No external dependencies.
 
-- `Entities/` — `User`
-- `Enums/` — `UserRole` (Customer / Administrator)
+- `Entities/` — `User`, `RestaurantTable`, `Reservation`, `MenuItem`
+- `Enums/` — `UserRole` (Customer / Administrator), `ReservationStatus` (Pending / Confirmed / Cancelled)
 - `Constants/` — `Roles` string constants for `[Authorize]` attributes
 
 ### RRMS.Application
 
 Contracts between API and Infrastructure layers.
 
-- `DTOs/Auth/` — `RegisterRequest`, `LoginRequest`, `LoginResponse`
-- `Interfaces/Repositories/` — `IUserRepository`, `IUnitOfWork`
-- `Interfaces/Services/` — `IAuthService`, `IJwtTokenService`
+- `DTOs/` — request/response records grouped by domain (`Auth/`, `Menu/`, `Tables/`, `Reservations/`)
+- `Interfaces/Repositories/` — `IUserRepository`, `IMenuItemRepository`, `IRestaurantTableRepository`, `IReservationRepository`, `IUnitOfWork`
+- `Interfaces/Services/` — `IAuthService`, `IMenuService`, `ITableService`, `IReservationService`, `IJwtTokenService`
 - `Services/` — skeleton implementations (throw `NotImplementedException`)
 - `DependencyInjection.cs` — `AddApplication()` extension method
 
@@ -57,18 +57,23 @@ Contracts between API and Infrastructure layers.
 
 Data access implementation.
 
-- `Data/AppDbContext.cs` — EF Core `DbContext` with `User` DbSet
+- `Data/AppDbContext.cs` — EF Core `DbContext` with `DbSet<>` properties for all entities
 - `Data/AppDbContextFactory.cs` — design-time factory for `dotnet ef migrations`
-- `Data/DbSeeder.cs` — startup data seeding (admin account)
-- `Configurations/UserConfiguration.cs` — EF Fluent API for User
-- `Repositories/` — `UserRepository`, `UnitOfWork`
+- `Data/DbSeeder.cs` — startup data seeding (admin account, sample menu)
+- `Configurations/` — EF Fluent API per entity (`IEntityTypeConfiguration<T>`)
+- `Repositories/` — repository and `UnitOfWork` implementations
 - `DependencyInjection.cs` — `AddInfrastructure()` extension method (registers DbContext + repositories)
 
 ### RRMS.Api
 
 Web API layer (entry point).
 
-- `Controllers/AuthController` — `POST /api/auth/register`, `POST /api/auth/login` (anonymous)
+- `Controllers/`
+  - `AuthController` — `POST /api/auth/register`, `POST /api/auth/login` (anonymous)
+  - `MenuController` — full CRUD `GET/POST/PUT/DELETE /api/menu` (read: anonymous, write: admin)
+  - `TablesController` — full CRUD `GET/POST/PUT/DELETE /api/tables` (read: authenticated, write: admin)
+  - `ReservationsController` — `POST`, `GET /my`, `DELETE /{id}` (authenticated)
+  - `AdminReservationsController` — `GET`, `PUT /{id}/status` at `/api/admin/reservations` (admin only)
 - `Middleware/ExceptionHandlingMiddleware.cs` — centralized error handling
 - `Extensions/ServiceCollectionExtensions.cs` — Swagger + JWT + CORS registration
 - `Program.cs` — application entry point
@@ -76,46 +81,29 @@ Web API layer (entry point).
 
 ## API Endpoints
 
-| Method | Endpoint              | Access | Description                    |
-|--------|-----------------------|--------|--------------------------------|
-| POST   | `/api/auth/register`  | Public | Register a new customer account |
-| POST   | `/api/auth/login`     | Public | Authenticate and get JWT token  |
+| Method  | Endpoint                         | Access          | Description                      |
+|---------|----------------------------------|-----------------|----------------------------------|
+| POST    | `/api/auth/register`             | Public          | Register a customer account      |
+| POST    | `/api/auth/login`                | Public          | Authenticate and get JWT token   |
+| GET     | `/api/menu`                      | Public          | Get all menu items               |
+| POST    | `/api/menu`                      | Administrator   | Create menu item                 |
+| PUT     | `/api/menu/{id}`                 | Administrator   | Update menu item                 |
+| DELETE  | `/api/menu/{id}`                 | Administrator   | Delete menu item                 |
+| GET     | `/api/tables`                    | Authenticated   | Get all tables                   |
+| POST    | `/api/tables`                    | Administrator   | Create a table                   |
+| PUT     | `/api/tables/{id}`               | Administrator   | Update a table                   |
+| DELETE  | `/api/tables/{id}`               | Administrator   | Delete a table                   |
+| POST    | `/api/reservations`              | Authenticated   | Create reservation               |
+| GET     | `/api/reservations/my`           | Authenticated   | Get own reservations             |
+| DELETE  | `/api/reservations/{id}`         | Reservation owner| Cancel reservation               |
+| GET     | `/api/admin/reservations`        | Administrator   | Get all reservations             |
+| PUT     | `/api/admin/reservations/{id}/status` | Administrator | Update reservation status     |
 
-### POST `/api/auth/register`
+## Reservation Statuses
 
-**Request body:**
-```json
-{
-  "name": "Anna Smith",
-  "email": "anna@example.com",
-  "password": "Password123"
-}
-```
-
-**Logic:**
-1. Validate: `name`, `email`, `password` required; `email` must be valid format; `password` min 6 chars
-2. Check email uniqueness → `400 Bad Request` if duplicate
-3. Hash the password
-4. Create `User` with role `Customer`
-5. Save to database
-6. Generate JWT token with claims: `sub` (UserId), `email`, `role`
-7. Return `200 OK` with `{ "token": "jwt-token" }`
-
-### POST `/api/auth/login`
-
-**Request body:**
-```json
-{
-  "email": "anna@example.com",
-  "password": "Password123"
-}
-```
-
-**Logic:**
-1. Find user by `email` → `401 Unauthorized` if not found
-2. Verify password hash → `401 Unauthorized` if invalid
-3. Generate JWT token (same format as registration)
-4. Return `200 OK` with `{ "token": "jwt-token" }`
+- `Pending` — initial state after creation
+- `Confirmed` — set by administrator
+- `Cancelled` — set by administrator or by the reservation owner
 
 ## Getting Started
 
@@ -186,5 +174,5 @@ dotnet ef database update --project src/RRMS.Infrastructure --startup-project sr
 
 ## Status
 
-Scaffold phase — Auth endpoints are skeleton only (throw `NotImplementedException`).
-The project compiles successfully. Database schema is being finalized by the team.
+Scaffold phase — all service methods throw `NotImplementedException`.
+The project compiles successfully. Implementation is pending.
