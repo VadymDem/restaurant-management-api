@@ -2,13 +2,124 @@
   box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
-  font-family: Arial, sans-serif;
-  color: #222;
-  background-color: #fff;
+  min-height: 100%;
 }
 
-main {
-  padding: 40px;
+body {
+  font-family: Arial, sans-serif;
+  color: #222;
+  background-color: #f7f7f7;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header */
+
+.app-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.header-content {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.navigation {
+  display: flex;
+  gap: 24px;
+}
+
+.navigation a:hover {
+  text-decoration: underline;
+}
+
+/* Main */
+
+.app-main {
+  flex: 1;
+  padding: 60px 0;
+}
+
+.hero {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  margin: 0 0 16px;
+  font-size: 40px;
+}
+
+.hero p {
+  margin: 0;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Footer */
+
+.app-footer {
+  padding: 24px 0;
+  text-align: center;
+  color: #666;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e5e5;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .header-content {
+    min-height: 60px;
+  }
+
+  .logo {
+    font-size: 17px;
+  }
+
+  .app-main {
+    padding: 30px 0;
+  }
+
+  .hero {
+    padding: 50px 10px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
 }
