@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Domain.Entities;
 using RRMS.Infrastructure.Data;
@@ -14,20 +15,24 @@ public class UserRepository : IUserRepository
     }
 
     public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: return await _dbContext.Users.FindAsync(...)");
+        => _dbContext.Users.SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: singleOrDefault by a case-insensitive email match.");
+        => _dbContext.Users.SingleOrDefaultAsync(
+            u => string.Equals(u.Email.ToLower(), email.ToLower(), StringComparison.Ordinal),
+            cancellationToken);
 
     public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: any() by email.");
+        => _dbContext.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower(), cancellationToken);
 
-    public Task AddAsync(User user, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: await _dbContext.Users.AddAsync(user);");
+    public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Users.AddAsync(user, cancellationToken);
+    }
 
     public void Update(User user)
-        => throw new NotImplementedException("TODO: _dbContext.Users.Update(user);");
+        => _dbContext.Users.Update(user);
 
     public void Delete(User user)
-        => throw new NotImplementedException("TODO: _dbContext.Users.Remove(user);");
+        => _dbContext.Users.Remove(user);
 }

@@ -1,18 +1,39 @@
 using RRMS.Application.DTOs.Auth;
+using RRMS.Application.Exceptions;
+using RRMS.Application.Interfaces.Repositories;
 using RRMS.Application.Interfaces.Services;
 
 namespace RRMS.Application.Services;
 
 public class AuthService : IAuthService
 {
-    // TODO: inject IUserRepository, IUnitOfWork and IJwtTokenService via constructor.
-    // TODO: decide on a password hashing strategy (e.g. BCrypt.Net-Next or ASP.NET Core Identity).
+    private readonly IUserRepository _userRepository;
+    private readonly IJwtTokenService _jwtTokenService;
+
+    public AuthService(IUserRepository userRepository, IJwtTokenService jwtTokenService)
+    {
+        _userRepository = userRepository;
+        _jwtTokenService = jwtTokenService;
+    }
+
+    public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByEmailAsync(request.Email.Trim(), cancellationToken);
+
+        if (user is null)
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        var token = _jwtTokenService.GenerateToken(user);
+        return new LoginResponse(token);
+    }
 
     public Task<LoginResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException(
-            "TODO: check that email is not registered, hash the password, create a User with Role = Customer, save and return a JWT token.");
-
-    public Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException(
-            "TODO: find user by email, verify the password hash and return a JWT token with the user's role claim.");
+        => throw new NotImplementedException("Register is planned for a later iteration.");
 }

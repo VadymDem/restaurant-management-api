@@ -12,6 +12,12 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
 
+    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
+
+    public DbSet<RestaurantTable> RestaurantTables => Set<RestaurantTable>();
+
+    public DbSet<Reservation> Reservations => Set<Reservation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

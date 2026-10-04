@@ -11,5 +11,5 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     public AppDbContext CreateDbContext(string[] args)
         => throw new NotImplementedException(
             "TODO: build a DbContextOptions<AppDbContext> pointing to the Supabase PostgreSQL connection string " +
-            "(e.g. read it from the SUPABASE_CONNECTION_STRING environment variable or appsettings) and return a new AppDbContext.");
+            "(e.g. read it from the ConnectionStrings__SupabaseConnection environment variable or appsettings) and return a new AppDbContext.");
 }

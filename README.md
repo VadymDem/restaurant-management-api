@@ -10,7 +10,8 @@ REST API backend for restaurant reservation management system.
 | ORM               | Entity Framework Core 10            |
 | Database          | PostgreSQL (hosted on Supabase)     |
 | Authentication    | JWT Bearer tokens                   |
-| API Documentation | Swashbuckle (Swagger UI)            |
+| Password Hashing  | BCrypt (BCrypt.Net-Next)            |
+| API Documentation | Swashbuckle 10 (Swagger UI)         |
 
 ## Architecture
 
@@ -50,7 +51,9 @@ Contracts between API and Infrastructure layers.
 - `DTOs/` — request/response records grouped by domain (`Auth/`, `Menu/`, `Tables/`, `Reservations/`)
 - `Interfaces/Repositories/` — `IUserRepository`, `IMenuItemRepository`, `IRestaurantTableRepository`, `IReservationRepository`, `IUnitOfWork`
 - `Interfaces/Services/` — `IAuthService`, `IMenuService`, `ITableService`, `IReservationService`, `IJwtTokenService`
-- `Services/` — skeleton implementations (throw `NotImplementedException`)
+- `Services/` — `AuthService` (login implemented), others throw `NotImplementedException`
+- `Options/JwtOptions.cs` — JWT configuration model
+- `Exceptions/` — `DomainException` and derived errors (404/401/409) mapped to ProblemDetails by middleware
 - `DependencyInjection.cs` — `AddApplication()` extension method
 
 ### RRMS.Infrastructure
@@ -121,14 +124,28 @@ dotnet restore RRMS.slnx
 # build
 dotnet build RRMS.slnx
 
-# set your Supabase connection string (PowerShell)
-$env:SUPABASE_CONNECTION_STRING = "Host=...;Database=...;Username=...;Password=...;SSL Mode=Require"
+# set configuration (see "Environment Variables" below)
 
 # run
 dotnet run --project src/RRMS.Api
 ```
 
-Open `https://localhost:<port>/swagger` to explore the API via Swagger UI.
+Open `https://localhost:<port>/swagger` to explore the API via Swagger UI (use **Authorize** with a token from `POST /api/auth/login`).
+
+### Environment Variables
+
+Override `appsettings.json` without editing tracked files (PowerShell syntax):
+
+```powershell
+$env:ConnectionStrings__SupabaseConnection = "Host=...;Database=...;Username=...;Password=...;SSL Mode=Require"
+$env:Jwt__Issuer = "rrms-api"
+$env:Jwt__Audience = "rrms-client"
+$env:Jwt__SecretKey = "random-secret-at-least-32-chars"
+$env:AdminSeed__Email = "admin@example.com"
+$env:AdminSeed__Password = "a-strong-password"
+```
+
+**Required:** the JWT `SecretKey` must be at least 32 characters long, otherwise the API fails fast at startup.
 
 ### Configuration
 
@@ -140,13 +157,20 @@ Open `https://localhost:<port>/swagger` to explore the API via Swagger UI.
     "SupabaseConnection": "your-supabase-connection-string"
   },
   "Jwt": {
-    "Issuer": "your-app",
-    "Audience": "your-app",
-    "SecretKey": "your-256-bit-secret",
+    "Issuer": "rrms-api",
+    "Audience": "rrms-client",
+    "SecretKey": "your-secret-key-at-least-32-chars",
     "ExpirationMinutes": 60
+  },
+  "AdminSeed": {
+    "Name": "Administrator",
+    "Email": "your-admin-email",
+    "Password": "your-admin-password"
   }
 }
 ```
+
+`AdminSeed` is used on the first startup: if no users exist yet, it creates an administrator account (idempotent; skipped if empty).
 
 > **Never commit real credentials.** Use environment variables or a secrets manager in production.
 
@@ -168,11 +192,21 @@ dotnet ef database update --project src/RRMS.Infrastructure --startup-project sr
 | RRMS.Api           | `Swashbuckle.AspNetCore`                     | Swagger UI / OpenAPI    |
 | RRMS.Api           | `Microsoft.EntityFrameworkCore.Design`      | EF Core migrations CLI  |
 | RRMS.Application   | `Microsoft.Extensions.DependencyInjection.Abstractions` | DI registration |
+| RRMS.Application   | `Microsoft.Extensions.Options`               | JWT options binding     |
+| RRMS.Application   | `System.IdentityModel.Tokens.Jwt`            | JWT token generation    |
+| RRMS.Application   | `BCrypt.Net-Next`                            | Password hashing        |
 | RRMS.Infrastructure | `Npgsql.EntityFrameworkCore.PostgreSQL`    | PostgreSQL provider     |
 | RRMS.Infrastructure | `Microsoft.EntityFrameworkCore`             | EF Core runtime         |
 | RRMS.Infrastructure | `Microsoft.Extensions.Configuration.Abstractions` | Configuration access |
 
 ## Status
 
-Scaffold phase — all service methods throw `NotImplementedException`.
-The project compiles successfully. Implementation is pending.
+Stage 2 completed:
+
+- `POST /api/auth/login` — verifies credentials with BCrypt and issues a signed JWT.
+- JWT bearer authentication configured (`AddJwtBearer`, issuer/audience/signing-key validation).
+- Swagger UI with Bearer security scheme; SwaggerUI is only enabled in Development.
+- Centralized `ExceptionHandlingMiddleware` — domain errors map to proper HTTP statuses (404/401/409), unexpected exceptions to 500.
+- Startup seeding of the default Administrator account.
+
+Remaining (`NotImplementedException`): `POST /api/auth/register` and all menu, table, reservation endpoints, plus EF Core migrations.

@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace RRMS.Application.DTOs.Auth;
 
 public sealed record LoginRequest(
-    string Email,
-    string Password);
+    [property: Required, EmailAddress] string Email,
+    [property: Required] string Password);
