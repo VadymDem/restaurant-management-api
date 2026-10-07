@@ -34,6 +34,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         .IsRequired()
         .HasMaxLength(20);
 
+    builder.Property(u => u.CreatedAtUtc)
+        .HasColumnName("created_at")
+        .IsRequired();    
+
     builder.HasIndex(u => u.Email).IsUnique();
 }
 }
