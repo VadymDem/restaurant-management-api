@@ -19,7 +19,7 @@ public class UserRepository : IUserRepository
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         => _dbContext.Users.SingleOrDefaultAsync(
-            u => string.Equals(u.Email.ToLower(), email.ToLower(), StringComparison.Ordinal),
+            u => u.Email.ToLower() == email.ToLower(),
             cancellationToken);
 
     public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
