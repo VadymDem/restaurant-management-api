@@ -10,37 +10,37 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable("users");
 
-        builder.HasKey(x => x.Id);
+        builder.HasKey(u => u.Id);
 
-        builder.Property(x => x.Id)
+        builder.Property(u => u.Id)
             .HasColumnName("id");
 
-        builder.Property(x => x.Name)
+        builder.Property(u => u.Name)
             .HasColumnName("name")
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(x => x.Email)
+        builder.Property(u => u.Email)
             .HasColumnName("email")
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.HasIndex(x => x.Email)
-            .IsUnique();
-
-        builder.Property(x => x.PasswordHash)
+        builder.Property(u => u.PasswordHash)
             .HasColumnName("password_hash")
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(x => x.Role)
+        builder.Property(u => u.Role)
             .HasColumnName("role")
             .HasConversion<string>()
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.Property(x => x.CreatedAtUtc)
+        builder.Property(u => u.CreatedAtUtc)
             .HasColumnName("created_at")
             .IsRequired();
+
+        builder.HasIndex(u => u.Email)
+            .IsUnique();
     }
 }
