@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Infrastructure.Data;
 using RRMS.Infrastructure.Repositories;
+using RRMS.Application.Interfaces.Services;
+using RRMS.Infrastructure.Services;
 
 namespace RRMS.Infrastructure;
 
@@ -27,6 +29,8 @@ public static class DependencyInjection
         services.AddScoped<IRestaurantTableRepository, RestaurantTableRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddHttpClient<IEmailService, ResendEmailService>();
 
         return services;
     }

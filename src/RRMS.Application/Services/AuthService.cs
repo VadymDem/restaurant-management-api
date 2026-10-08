@@ -11,13 +11,16 @@ public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IEmailService _emailService;
 
     public AuthService(
-        IUnitOfWork unitOfWork,
-        IJwtTokenService jwtTokenService)
+     IUnitOfWork unitOfWork,
+     IJwtTokenService jwtTokenService,
+     IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
         _jwtTokenService = jwtTokenService;
+        _emailService = emailService;
     }
 
     public async Task<LoginResponse> LoginAsync(
@@ -77,6 +80,18 @@ public class AuthService : IAuthService
 
         await _unitOfWork.SaveChangesAsync(
             cancellationToken);
+
+        try
+        {
+            await _emailService.SendWelcomeEmailAsync(
+                user.Email,
+                user.Name,
+                cancellationToken);
+        }
+        catch
+        {
+            // Registration should still succeed even if the welcome email fails.
+        }
 
         var token = _jwtTokenService.GenerateToken(user);
 
