@@ -114,6 +114,10 @@ a {
   backdrop-filter: blur(5px);
 }
 
+.auth-card--compact {
+  max-width: 500px;
+}
+
 .auth-heading {
   margin-bottom: 32px;
   text-align: center;
@@ -217,6 +221,21 @@ a {
 .primary-button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.auth-switch {
+  margin: 24px 0 0;
+  color: #666;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: #8b4513;
+  font-weight: 700;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
 }
 
 /* Footer */

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
+import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
 function HomePage() {
@@ -27,6 +28,14 @@ function App() {
         element={
           <Layout fullWidth>
             <RegisterPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <Layout fullWidth>
+            <LoginPage />
           </Layout>
         }
       />

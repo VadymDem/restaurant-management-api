@@ -1,4 +1,8 @@
-import type { LoginResponse, RegisterRequest } from '../types/auth'
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+} from '../types/auth'
 
 interface ApiProblemDetails {
   title?: string
@@ -25,10 +29,11 @@ async function getErrorMessage(response: Response): Promise<string> {
   }
 }
 
-export async function registerUser(
-  request: RegisterRequest,
+async function submitAuthRequest(
+  endpoint: 'login' | 'register',
+  request: LoginRequest | RegisterRequest,
 ): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+  const response = await fetch(`${API_BASE_URL}/api/auth/${endpoint}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -47,4 +52,12 @@ export async function registerUser(
   }
 
   return result
+}
+
+export function registerUser(request: RegisterRequest): Promise<LoginResponse> {
+  return submitAuthRequest('register', request)
+}
+
+export function loginUser(request: LoginRequest): Promise<LoginResponse> {
+  return submitAuthRequest('login', request)
 }
