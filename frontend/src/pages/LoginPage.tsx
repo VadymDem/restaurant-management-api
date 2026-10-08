@@ -1,66 +1,45 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { registerUser } from '../services/authService'
+import { loginUser } from '../services/authService'
 
-interface RegisterFormValues {
-  name: string
+interface LoginFormValues {
   email: string
   password: string
-  confirmPassword: string
 }
 
-type RegisterFormErrors = Partial<Record<keyof RegisterFormValues, string>>
+type LoginFormErrors = Partial<Record<keyof LoginFormValues, string>>
 
-const initialFormValues: RegisterFormValues = {
-  name: '',
+const initialFormValues: LoginFormValues = {
   email: '',
   password: '',
-  confirmPassword: '',
 }
 
-function validateForm(values: RegisterFormValues): RegisterFormErrors {
-  const errors: RegisterFormErrors = {}
-  const name = values.name.trim()
+function validateForm(values: LoginFormValues): LoginFormErrors {
+  const errors: LoginFormErrors = {}
   const email = values.email.trim()
-
-  if (name.length < 2) {
-    errors.name = 'Name must contain at least 2 characters.'
-  } else if (name.length > 100) {
-    errors.name = 'Name cannot exceed 100 characters.'
-  }
 
   if (!email) {
     errors.email = 'Email is required.'
-  } else if (email.length > 255) {
-    errors.email = 'Email cannot exceed 255 characters.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = 'Enter a valid email address.'
   }
 
-  if (values.password.length < 8) {
-    errors.password = 'Password must contain at least 8 characters.'
-  } else if (values.password.length > 100) {
-    errors.password = 'Password cannot exceed 100 characters.'
-  }
-
-  if (!values.confirmPassword) {
-    errors.confirmPassword = 'Confirm your password.'
-  } else if (values.confirmPassword !== values.password) {
-    errors.confirmPassword = 'Passwords do not match.'
+  if (!values.password) {
+    errors.password = 'Password is required.'
   }
 
   return errors
 }
 
-function RegisterPage() {
+function LoginPage() {
   const navigate = useNavigate()
   const [values, setValues] = useState(initialFormValues)
-  const [errors, setErrors] = useState<RegisterFormErrors>({})
+  const [errors, setErrors] = useState<LoginFormErrors>({})
   const [serverError, setServerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    const field = event.target.name as keyof RegisterFormValues
+    const field = event.target.name as keyof LoginFormValues
     const value = event.target.value
 
     setValues((currentValues) => ({
@@ -89,8 +68,7 @@ function RegisterPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await registerUser({
-        name: values.name.trim(),
+      const response = await loginUser({
         email: values.email.trim(),
         password: values.password,
       })
@@ -101,7 +79,7 @@ function RegisterPage() {
       setServerError(
         error instanceof Error
           ? error.message
-          : 'Registration failed. Please try again.',
+          : 'Login failed. Please try again.',
       )
     } finally {
       setIsSubmitting(false)
@@ -110,34 +88,14 @@ function RegisterPage() {
 
   return (
     <section className="auth-section">
-      <div className="auth-card">
+      <div className="auth-card auth-card--compact">
         <div className="auth-heading">
-          <p className="auth-eyebrow">Welcome</p>
-          <h1>Create your account</h1>
-          <p>Register to reserve a table and manage your reservations.</p>
+          <p className="auth-eyebrow">Welcome back</p>
+          <h1>Log in to your account</h1>
+          <p>Access your reservations and manage your account.</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          <div className="form-field">
-            <label htmlFor="name">Name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={values.name}
-              onChange={handleChange}
-              autoComplete="name"
-              aria-invalid={Boolean(errors.name)}
-              aria-describedby={errors.name ? 'name-error' : undefined}
-              disabled={isSubmitting}
-            />
-            {errors.name && (
-              <p className="field-error" id="name-error">
-                {errors.name}
-              </p>
-            )}
-          </div>
-
           <div className="form-field">
             <label htmlFor="email">Email</label>
             <input
@@ -166,7 +124,7 @@ function RegisterPage() {
               type="password"
               value={values.password}
               onChange={handleChange}
-              autoComplete="new-password"
+              autoComplete="current-password"
               aria-invalid={Boolean(errors.password)}
               aria-describedby={errors.password ? 'password-error' : undefined}
               disabled={isSubmitting}
@@ -178,28 +136,6 @@ function RegisterPage() {
             )}
           </div>
 
-          <div className="form-field">
-            <label htmlFor="confirmPassword">Confirm password</label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={values.confirmPassword}
-              onChange={handleChange}
-              autoComplete="new-password"
-              aria-invalid={Boolean(errors.confirmPassword)}
-              aria-describedby={
-                errors.confirmPassword ? 'confirm-password-error' : undefined
-              }
-              disabled={isSubmitting}
-            />
-            {errors.confirmPassword && (
-              <p className="field-error" id="confirm-password-error">
-                {errors.confirmPassword}
-              </p>
-            )}
-          </div>
-
           {serverError && (
             <p className="form-error" role="alert">
               {serverError}
@@ -207,16 +143,16 @@ function RegisterPage() {
           )}
 
           <button className="primary-button" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating account...' : 'Create account'}
+            {isSubmitting ? 'Logging in...' : 'Log in'}
           </button>
         </form>
 
         <p className="auth-switch">
-          Already have an account? <Link to="/login">Log in</Link>
+          Do not have an account? <Link to="/register">Create one</Link>
         </p>
       </div>
     </section>
   )
 }
 
-export default RegisterPage
+export default LoginPage

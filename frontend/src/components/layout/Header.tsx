@@ -10,6 +10,7 @@ function Header() {
 
         <nav className="navigation" aria-label="Main navigation">
           <Link to="/">Home</Link>
+          <Link to="/login">Login</Link>
           <Link to="/register">Register</Link>
         </nav>
       </div>
