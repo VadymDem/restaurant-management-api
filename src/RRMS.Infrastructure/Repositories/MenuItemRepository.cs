@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Domain.Entities;
 using RRMS.Infrastructure.Data;
@@ -13,18 +14,23 @@ public class MenuItemRepository : IMenuItemRepository
         _dbContext = dbContext;
     }
 
-    public Task<IReadOnlyList<MenuItem>> GetAllAsync(CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: _dbContext.MenuItems.ToListAsync() ordered by ItemName.");
+    public async Task<IReadOnlyList<MenuItem>> GetAllAsync(CancellationToken cancellationToken = default)
+        => await _dbContext.MenuItems
+            .AsNoTracking()
+            .OrderBy(m => m.ItemName)
+            .ToListAsync(cancellationToken);
 
     public Task<MenuItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: return await _dbContext.MenuItems.FindAsync(...)");
+        => _dbContext.MenuItems.SingleOrDefaultAsync(m => m.Id == id, cancellationToken);
 
-    public Task AddAsync(MenuItem menuItem, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: await _dbContext.MenuItems.AddAsync(menuItem);");
+    public async Task AddAsync(MenuItem menuItem, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.MenuItems.AddAsync(menuItem, cancellationToken);
+    }
 
     public void Update(MenuItem menuItem)
-        => throw new NotImplementedException("TODO: _dbContext.MenuItems.Update(menuItem);");
+        => _dbContext.MenuItems.Update(menuItem);
 
     public void Delete(MenuItem menuItem)
-        => throw new NotImplementedException("TODO: _dbContext.MenuItems.Remove(menuItem);");
+        => _dbContext.MenuItems.Remove(menuItem);
 }
