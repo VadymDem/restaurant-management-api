@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RRMS.Application.DTOs.Menu;
@@ -19,7 +20,8 @@ public class MenuController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IReadOnlyList<MenuItemResponse>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<MenuItemResponse>>> GetAll(
+        CancellationToken cancellationToken)
     {
         var items = await _menuService.GetAllAsync(cancellationToken);
         return Ok(items);
@@ -31,24 +33,30 @@ public class MenuController : ControllerBase
         [FromBody] MenuItemRequest request,
         CancellationToken cancellationToken)
     {
-        var item = await _menuService.CreateAsync(request, cancellationToken);
+        var item = await _menuService.CreateAsync(
+            request, cancellationToken);
+
         return CreatedAtAction(nameof(GetAll), item);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPut("{id:long}")]
     [Authorize(Roles = Roles.Administrator)]
     public async Task<ActionResult<MenuItemResponse>> Update(
-        Guid id,
+        long id,
         [FromBody] MenuItemRequest request,
         CancellationToken cancellationToken)
     {
-        var item = await _menuService.UpdateAsync(id, request, cancellationToken);
+        var item = await _menuService.UpdateAsync(
+            id, request, cancellationToken);
+
         return Ok(item);
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("{id:long}")]
     [Authorize(Roles = Roles.Administrator)]
-    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult> Delete(
+        long id,
+        CancellationToken cancellationToken)
     {
         await _menuService.DeleteAsync(id, cancellationToken);
         return NoContent();

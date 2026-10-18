@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Domain.Entities;
@@ -14,16 +15,22 @@ public class MenuItemRepository : IMenuItemRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<MenuItem>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<MenuItem>> GetAllAsync(
+        CancellationToken cancellationToken = default)
         => await _dbContext.MenuItems
             .AsNoTracking()
             .OrderBy(m => m.ItemName)
             .ToListAsync(cancellationToken);
 
-    public Task<MenuItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => _dbContext.MenuItems.SingleOrDefaultAsync(m => m.Id == id, cancellationToken);
+    public Task<MenuItem?> GetByIdAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+        => _dbContext.MenuItems.SingleOrDefaultAsync(
+            m => m.Id == id, cancellationToken);
 
-    public async Task AddAsync(MenuItem menuItem, CancellationToken cancellationToken = default)
+    public async Task AddAsync(
+        MenuItem menuItem,
+        CancellationToken cancellationToken = default)
     {
         await _dbContext.MenuItems.AddAsync(menuItem, cancellationToken);
     }
