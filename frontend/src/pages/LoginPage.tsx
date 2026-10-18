@@ -73,8 +73,24 @@ function LoginPage() {
         password: values.password,
       })
 
-      localStorage.setItem('authToken', response.token)
-      navigate('/')
+     localStorage.setItem('authToken', response.token)
+
+const payload = JSON.parse(
+  atob(response.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+)
+
+const role =
+  payload.role ??
+  payload.roles ??
+  payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+
+navigate(
+  role === 'Administrator' ||
+    (Array.isArray(role) && role.includes('Administrator'))
+    ? '/admin/menu'
+    : '/',
+  { replace: true },
+)
     } catch (error) {
       setServerError(
         error instanceof Error
