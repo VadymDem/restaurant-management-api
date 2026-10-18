@@ -15,7 +15,7 @@ CREATE TABLE menu (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_name   VARCHAR(150) NOT NULL,
     description TEXT,
-    price       NUMERIC(10, 2) NOT NULL CHECK (price >= 0)
+    price       NUMERIC(10, 2) NOT NULL CHECK (price > 0)
 );
 
 CREATE TABLE admins (
