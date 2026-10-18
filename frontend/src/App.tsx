@@ -1,5 +1,8 @@
+
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
+import AdminRoute from './components/AdminRoute'
+import AdminMenuPage from './pages/AdminMenuPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
@@ -23,6 +26,7 @@ function App() {
           </Layout>
         }
       />
+
       <Route
         path="/register"
         element={
@@ -31,6 +35,7 @@ function App() {
           </Layout>
         }
       />
+
       <Route
         path="/login"
         element={
@@ -39,6 +44,18 @@ function App() {
           </Layout>
         }
       />
+
+      <Route
+        path="/admin/menu"
+        element={
+          <Layout>
+            <AdminRoute>
+              <AdminMenuPage />
+            </AdminRoute>
+          </Layout>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
