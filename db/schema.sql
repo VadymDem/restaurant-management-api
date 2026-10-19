@@ -1,9 +1,14 @@
 CREATE TABLE users (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email         VARCHAR(255) NOT NULL UNIQUE,
+    id            UUID NOT NULL DEFAULT gen_random_uuid(),
+    name          VARCHAR(100) NOT NULL,
+    email         VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    name          VARCHAR(100) NOT NULL
+    role          VARCHAR(20) NOT NULL DEFAULT 'User',
+    created_at    TIMESTAMP NOT NULL DEFAULT now(),
+    CONSTRAINT users_pkey PRIMARY KEY (id)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email);
 
 CREATE TABLE tables (
     id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -11,11 +16,17 @@ CREATE TABLE tables (
     capacity INT NOT NULL CHECK (capacity > 0)
 );
 
-CREATE TABLE menu (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    item_name   VARCHAR(150) NOT NULL,
-    description TEXT,
-    price       NUMERIC(10, 2) NOT NULL CHECK (price > 0)
+CREATE TABLE "MenuItems" (
+    id           BIGINT GENERATED ALWAYS AS IDENTITY NOT NULL,
+    name         TEXT NOT NULL,
+    description  TEXT NULL,
+    price        NUMERIC(10, 2) NOT NULL,
+    category     TEXT NULL,
+    image_url    TEXT NULL,
+    is_available BOOLEAN NOT NULL DEFAULT true,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT "MenuItems_pkey" PRIMARY KEY (id),
+    CONSTRAINT "MenuItems_price_check" CHECK (price > 0)
 );
 
 CREATE TABLE admins (

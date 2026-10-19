@@ -24,6 +24,8 @@ RRMS.slnx
 │   ├── RRMS.Application/       # Business logic interfaces, DTOs, service contracts
 │   ├── RRMS.Infrastructure/    # EF Core DbContext, repositories, DB seeding
 │   └── RRMS.Api/               # ASP.NET Core controllers, middleware, startup
+└── tests/
+    └── RRMS.Application.Tests/ # xUnit unit tests
 ```
 
 Dependency flow:
@@ -51,7 +53,7 @@ Contracts between API and Infrastructure layers.
 - `DTOs/` — request/response records grouped by domain (`Auth/`, `Menu/`, `Tables/`, `Reservations/`)
 - `Interfaces/Repositories/` — `IUserRepository`, `IMenuItemRepository`, `IRestaurantTableRepository`, `IReservationRepository`, `IUnitOfWork`
 - `Interfaces/Services/` — `IAuthService`, `IMenuService`, `ITableService`, `IReservationService`, `IJwtTokenService`
-- `Services/` — `AuthService` (login implemented), others throw `NotImplementedException`
+- `Services/` — `AuthService` (login), `MenuService` (menu CRUD), others throw `NotImplementedException`
 - `Options/JwtOptions.cs` — JWT configuration model
 - `Exceptions/` — `DomainException` and derived errors (404/401/409) mapped to ProblemDetails by middleware
 - `DependencyInjection.cs` — `AddApplication()` extension method
@@ -123,6 +125,9 @@ dotnet restore RRMS.slnx
 
 # build
 dotnet build RRMS.slnx
+
+# run tests
+dotnet test RRMS.slnx
 
 # set configuration (see "Environment Variables" below)
 
@@ -209,4 +214,10 @@ Stage 2 completed:
 - Centralized `ExceptionHandlingMiddleware` — domain errors map to proper HTTP statuses (404/401/409), unexpected exceptions to 500.
 - Startup seeding of the default Administrator account.
 
-Remaining (`NotImplementedException`): `POST /api/auth/register` and all menu, table, reservation endpoints, plus EF Core migrations.
+Stage 3 (menu) completed:
+
+- Menu CRUD at `/api/menu` backed by the `MenuItems` table (`GET` anonymous, writes administrator-only).
+- Price validation: `0.01`–`1000000` with at most two decimal places (matches `NUMERIC(10,2)`).
+- xUnit unit tests (`tests/RRMS.Application.Tests`) and GitHub Actions CI (`.github/workflows/ci.yml`).
+
+Remaining (`NotImplementedException`): `POST /api/auth/register` and the table/reservation endpoints, plus EF Core migrations.
