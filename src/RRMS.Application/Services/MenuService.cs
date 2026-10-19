@@ -1,3 +1,4 @@
+
 using RRMS.Application.DTOs.Menu;
 using RRMS.Application.Exceptions;
 using RRMS.Application.Interfaces.Repositories;
@@ -19,17 +20,19 @@ public class MenuService : IMenuService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<MenuItemResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<MenuItemResponse>> GetAllAsync(
+        CancellationToken cancellationToken = default)
     {
         var items = await _menuItemRepository.GetAllAsync(cancellationToken);
         return items.Select(Map).ToList();
     }
 
-    public async Task<MenuItemResponse> CreateAsync(MenuItemRequest request, CancellationToken cancellationToken = default)
+    public async Task<MenuItemResponse> CreateAsync(
+        MenuItemRequest request,
+        CancellationToken cancellationToken = default)
     {
         var item = new MenuItem
         {
-            Id = Guid.NewGuid(),
             ItemName = request.ItemName.Trim(),
             Description = NormalizeDescription(request.Description),
             Price = request.Price
@@ -41,10 +44,15 @@ public class MenuService : IMenuService
         return Map(item);
     }
 
-    public async Task<MenuItemResponse> UpdateAsync(Guid id, MenuItemRequest request, CancellationToken cancellationToken = default)
+    public async Task<MenuItemResponse> UpdateAsync(
+        long id,
+        MenuItemRequest request,
+        CancellationToken cancellationToken = default)
     {
-        var item = await _menuItemRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new NotFoundException($"Menu item with id '{id}' was not found.");
+        var item = await _menuItemRepository.GetByIdAsync(
+            id, cancellationToken)
+            ?? throw new NotFoundException(
+                $"Menu item with id '{id}' was not found.");
 
         item.ItemName = request.ItemName.Trim();
         item.Description = NormalizeDescription(request.Description);
@@ -56,17 +64,23 @@ public class MenuService : IMenuService
         return Map(item);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(
+        long id,
+        CancellationToken cancellationToken = default)
     {
-        var item = await _menuItemRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new NotFoundException($"Menu item with id '{id}' was not found.");
+        var item = await _menuItemRepository.GetByIdAsync(
+            id, cancellationToken)
+            ?? throw new NotFoundException(
+                $"Menu item with id '{id}' was not found.");
 
         _menuItemRepository.Delete(item);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private static string? NormalizeDescription(string? description)
-        => string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        => string.IsNullOrWhiteSpace(description)
+            ? null
+            : description.Trim();
 
     private static MenuItemResponse Map(MenuItem item)
         => new(item.Id, item.ItemName, item.Description, item.Price);
