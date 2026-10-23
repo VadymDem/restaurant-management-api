@@ -3,17 +3,10 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import AdminRoute from './components/AdminRoute'
 import AdminMenuPage from './pages/AdminMenuPage'
+import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import MenuPage from './pages/MenuPage'
 import RegisterPage from './pages/RegisterPage'
-
-function HomePage() {
-  return (
-    <section className="hero">
-      <h1>Restaurant Reservation Management System</h1>
-      <p>Simple and convenient restaurant table reservation management.</p>
-    </section>
-  )
-}
 
 function App() {
   return (
@@ -21,7 +14,7 @@ function App() {
       <Route
         path="/"
         element={
-          <Layout>
+          <Layout fullWidth>
             <HomePage />
           </Layout>
         }
@@ -41,6 +34,15 @@ function App() {
         element={
           <Layout fullWidth>
             <LoginPage />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/menu"
+        element={
+          <Layout fullWidth>
+            <MenuPage />
           </Layout>
         }
       />

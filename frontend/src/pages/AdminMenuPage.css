@@ -74,9 +74,14 @@
 }
 
 .admin-menu__button--primary {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #8b4513;
+  border-color: #8b4513;
   color: white;
+}
+
+.admin-menu__button--primary:hover:not(:disabled) {
+  background: #6f350e;
+  border-color: #6f350e;
 }
 
 .admin-menu__button--danger {
