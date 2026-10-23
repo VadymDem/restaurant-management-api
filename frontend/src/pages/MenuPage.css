@@ -1,0 +1,187 @@
+.menu-page {
+  color: #2a211b;
+  background: #f8f4ef;
+}
+
+.menu-page__hero {
+  position: relative;
+  display: grid;
+  min-height: 420px;
+  place-items: center;
+  padding: 72px 24px;
+  color: #ffffff;
+  text-align: center;
+  background-image:
+    linear-gradient(rgba(27, 16, 10, 0.58), rgba(27, 16, 10, 0.74)),
+    url('../assets/restaurant-interior.jpg');
+  background-position: center;
+  background-size: cover;
+}
+
+.menu-page__hero-content {
+  width: min(760px, 100%);
+}
+
+.menu-page__hero-content p,
+.menu-page__eyebrow {
+  margin: 0;
+  color: #c9854c;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.menu-page__hero-content p {
+  color: #efb57f;
+}
+
+.menu-page__hero-content h1 {
+  margin: 14px 0 18px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(42px, 7vw, 68px);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.menu-page__hero-content span {
+  display: block;
+  color: #f2ece7;
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.menu-page__content {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 72px 24px 88px;
+}
+
+.menu-page__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 460px);
+  align-items: end;
+  gap: 48px;
+  margin-bottom: 38px;
+}
+
+.menu-page__intro h2 {
+  margin: 10px 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 600;
+}
+
+.menu-page__intro > p {
+  margin: 0;
+  color: #6b625c;
+  line-height: 1.7;
+}
+
+.menu-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.menu-page__state {
+  padding: 60px 24px;
+  border: 1px solid #e4ddd5;
+  border-radius: 18px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.menu-page__state h2 {
+  margin: 0 0 10px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+}
+
+.menu-page__state p {
+  margin: 0;
+  color: #6b625c;
+  line-height: 1.6;
+}
+
+.menu-page__state--error {
+  border-color: #e7b9b3;
+  background: #fff8f7;
+}
+
+.menu-page__state button {
+  margin-top: 22px;
+  padding: 11px 22px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #8b4513;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-page__state button:hover {
+  background: #6f350e;
+}
+
+.menu-page__skeleton {
+  min-height: 230px;
+  border: 1px solid #e8e1da;
+  border-radius: 18px;
+  background: linear-gradient(100deg, #eee7df 30%, #faf7f3 50%, #eee7df 70%);
+  background-size: 250% 100%;
+  animation: menu-loading 1.4s ease-in-out infinite;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes menu-loading {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-page__skeleton {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .menu-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .menu-page__hero {
+    min-height: 350px;
+    padding: 56px 20px;
+  }
+
+  .menu-page__content {
+    padding: 52px 16px 64px;
+  }
+
+  .menu-page__intro {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .menu-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
