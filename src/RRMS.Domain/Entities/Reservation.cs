@@ -4,25 +4,23 @@ namespace RRMS.Domain.Entities;
 
 public class Reservation
 {
-    public Guid Id { get; set; }
-
-    public string CustomerName { get; set; } = default!;
-
-    public string CustomerEmail { get; set; } = default!;
-
-    public string PhoneNumber { get; set; } = default!;
-
-    public int NumberOfPeople { get; set; }
-
-    public DateTime ReservationDateTime { get; set; }
-
-    public string? SpecialRequests { get; set; }
-
-    public ReservationStatus Status { get; set; }
+    public long Id { get; set; }
 
     public Guid UserId { get; set; }
     public User User { get; set; } = default!;
 
-    public Guid TableId { get; set; }
+    public long TableId { get; set; }
     public RestaurantTable Table { get; set; } = default!;
+
+    public DateOnly ReservationDate { get; set; }
+
+    public TimeOnly ReservationTime { get; set; }
+
+    public int GuestsCount { get; set; }
+
+    public ReservationStatus Status { get; set; }
+
+    public string? Notes { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 }

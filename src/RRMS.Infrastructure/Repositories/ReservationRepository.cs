@@ -14,21 +14,57 @@ public class ReservationRepository : IReservationRepository
         _dbContext = dbContext;
     }
 
-    public Task<Reservation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: _dbContext.Reservations.Include(r => r.Table).FirstOrDefaultAsync(...)");
+    public async Task<Reservation?> GetByIdAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Reservations
+            .Include(r => r.Table)
+            .FirstOrDefaultAsync(
+                r => r.Id == id,
+                cancellationToken);
+    }
 
-    public Task<IReadOnlyList<Reservation>> GetByUserAsync(Guid userId, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: filter by UserId and order by ReservationDateTime.");
+    public async Task<IReadOnlyList<Reservation>> GetByUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Reservations
+            .AsNoTracking()
+            .Include(r => r.Table)
+            .Where(r => r.UserId == userId)
+            .OrderBy(r => r.ReservationDate)
+            .ThenBy(r => r.ReservationTime)
+            .ToListAsync(cancellationToken);
+    }
 
-    public Task<IReadOnlyList<Reservation>> GetAllAsync(CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: all reservations with their table loaded, ordered by ReservationDateTime.");
+    public async Task<IReadOnlyList<Reservation>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Reservations
+            .AsNoTracking()
+            .Include(r => r.Table)
+            .OrderBy(r => r.ReservationDate)
+            .ThenBy(r => r.ReservationTime)
+            .ToListAsync(cancellationToken);
+    }
 
-    public Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: await _dbContext.Reservations.AddAsync(reservation);");
+    public async Task AddAsync(
+        Reservation reservation,
+        CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Reservations.AddAsync(
+            reservation,
+            cancellationToken);
+    }
 
     public void Update(Reservation reservation)
-        => throw new NotImplementedException("TODO: _dbContext.Reservations.Update(reservation);");
+    {
+        _dbContext.Reservations.Update(reservation);
+    }
 
     public void Delete(Reservation reservation)
-        => throw new NotImplementedException("TODO: _dbContext.Reservations.Remove(reservation);");
+    {
+        _dbContext.Reservations.Remove(reservation);
+    }
 }

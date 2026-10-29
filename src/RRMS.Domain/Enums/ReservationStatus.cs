@@ -1,3 +1,4 @@
+
 namespace RRMS.Domain.Enums;
 
 public enum ReservationStatus
@@ -5,4 +6,5 @@ public enum ReservationStatus
     Pending,
     Confirmed,
     Cancelled,
+    Completed
 }

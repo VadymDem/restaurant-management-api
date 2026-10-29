@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Domain.Entities;
 using RRMS.Infrastructure.Data;
@@ -13,21 +14,46 @@ public class RestaurantTableRepository : IRestaurantTableRepository
         _dbContext = dbContext;
     }
 
-    public Task<IReadOnlyList<RestaurantTable>> GetAllAsync(CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: _dbContext.RestaurantTables.ToListAsync() ordered by Number.");
+    public async Task<IReadOnlyList<RestaurantTable>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.RestaurantTables
+            .AsNoTracking()
+            .OrderBy(t => t.Number)
+            .ToListAsync(cancellationToken);
+    }
 
-    public Task<RestaurantTable?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: return await _dbContext.RestaurantTables.FindAsync(...)");
+    public async Task<RestaurantTable?> GetByIdAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.RestaurantTables
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
 
-    public Task<bool> NumberExistsAsync(int number, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: _dbContext.RestaurantTables.AnyAsync(t => t.Number == number)");
+    public async Task<bool> NumberExistsAsync(
+        int number,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.RestaurantTables
+            .AnyAsync(t => t.Number == number, cancellationToken);
+    }
 
-    public Task AddAsync(RestaurantTable table, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("TODO: await _dbContext.RestaurantTables.AddAsync(table);");
+    public async Task AddAsync(
+        RestaurantTable table,
+        CancellationToken cancellationToken = default)
+    {
+        await _dbContext.RestaurantTables.AddAsync(
+            table, cancellationToken);
+    }
 
     public void Update(RestaurantTable table)
-        => throw new NotImplementedException("TODO: _dbContext.RestaurantTables.Update(table);");
+    {
+        _dbContext.RestaurantTables.Update(table);
+    }
 
     public void Delete(RestaurantTable table)
-        => throw new NotImplementedException("TODO: _dbContext.RestaurantTables.Remove(table);");
+    {
+        _dbContext.RestaurantTables.Remove(table);
+    }
 }
