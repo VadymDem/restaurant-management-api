@@ -24,23 +24,34 @@ public class ReservationsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var userId = GetCurrentUserId();
-        var reservation = await _reservationService.CreateAsync(userId, request, cancellationToken);
-        return CreatedAtAction(nameof(GetMy), reservation);
+        var reservation = await _reservationService.CreateAsync(
+            userId, request, cancellationToken);
+
+        return StatusCode(StatusCodes.Status201Created, reservation);
     }
 
     [HttpGet("my")]
-    public async Task<ActionResult<IReadOnlyList<ReservationResponse>>> GetMy(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<ReservationResponse>>> GetMy(
+        CancellationToken cancellationToken)
     {
         var userId = GetCurrentUserId();
-        var reservations = await _reservationService.GetForUserAsync(userId, cancellationToken);
+
+        var reservations = await _reservationService.GetForUserAsync(
+            userId, cancellationToken);
+
         return Ok(reservations);
     }
 
-    [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> Cancel(Guid id, CancellationToken cancellationToken)
+    [HttpDelete("{id:long}")]
+    public async Task<IActionResult> Cancel(
+        long id,
+        CancellationToken cancellationToken)
     {
         var userId = GetCurrentUserId();
-        await _reservationService.CancelAsync(userId, id, cancellationToken);
+
+        await _reservationService.CancelAsync(
+            userId, id, cancellationToken);
+
         return NoContent();
     }
 
