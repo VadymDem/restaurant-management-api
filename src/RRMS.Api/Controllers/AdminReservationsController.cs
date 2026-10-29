@@ -20,20 +20,23 @@ public class AdminReservationsController : ControllerBase
 
     // GET api/admin/reservations
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ReservationResponse>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<ReservationResponse>>> GetAll(
+        CancellationToken cancellationToken)
     {
         var reservations = await _reservationService.GetAllAsync(cancellationToken);
         return Ok(reservations);
     }
 
     // PUT api/admin/reservations/{id}/status
-    [HttpPut("{id:guid}/status")]
+    [HttpPut("{id:long}/status")]
     public async Task<ActionResult<ReservationResponse>> UpdateStatus(
-        Guid id,
+        long id,
         [FromBody] UpdateReservationStatusRequest request,
         CancellationToken cancellationToken)
     {
-        var reservation = await _reservationService.UpdateStatusAsync(id, request.Status, cancellationToken);
+        var reservation = await _reservationService.UpdateStatusAsync(
+            id, request.Status, cancellationToken);
+
         return Ok(reservation);
     }
 }
