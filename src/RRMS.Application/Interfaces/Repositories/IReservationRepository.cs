@@ -22,4 +22,11 @@ public interface IReservationRepository
     void Update(Reservation reservation);
 
     void Delete(Reservation reservation);
+
+    Task<bool> SlotExistsAsync(
+        long tableId,
+        DateOnly reservationDate,
+        TimeOnly reservationTime,
+        CancellationToken cancellationToken = default);
+
 }

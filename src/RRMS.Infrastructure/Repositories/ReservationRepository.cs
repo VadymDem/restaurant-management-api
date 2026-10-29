@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Domain.Entities;
 using RRMS.Infrastructure.Data;
+using RRMS.Domain.Enums;
 
 namespace RRMS.Infrastructure.Repositories;
 
@@ -22,6 +23,22 @@ public class ReservationRepository : IReservationRepository
             .Include(r => r.Table)
             .FirstOrDefaultAsync(
                 r => r.Id == id,
+                cancellationToken);
+    }
+
+    public async Task<bool> SlotExistsAsync(
+        long tableId,
+        DateOnly reservationDate,
+        TimeOnly reservationTime,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Reservations
+            .AsNoTracking()
+            .AnyAsync(r =>
+                r.TableId == tableId &&
+                r.ReservationDate == reservationDate &&
+                r.ReservationTime == reservationTime &&
+                r.Status != ReservationStatus.Cancelled,
                 cancellationToken);
     }
 
