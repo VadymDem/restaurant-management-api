@@ -95,6 +95,7 @@ Web API layer (entry point).
 | PUT     | `/api/menu/{id}`                 | Administrator   | Update menu item                 |
 | DELETE  | `/api/menu/{id}`                 | Administrator   | Delete menu item                 |
 | GET     | `/api/tables`                    | Authenticated   | Get all tables                   |
+| GET     | `/api/tables/available`          | Authenticated   | Get available tables (optional `date`, `time`, `guests`) |
 | POST    | `/api/tables`                    | Administrator   | Create a table                   |
 | PUT     | `/api/tables/{id}`               | Administrator   | Update a table                   |
 | DELETE  | `/api/tables/{id}`               | Administrator   | Delete a table                   |

@@ -1,6 +1,8 @@
 namespace RRMS.Application.DTOs.Tables;
 
 public sealed record RestaurantTableResponse(
-    Guid Id,
+    long Id,
     int Number,
-    int Capacity);
+    int Capacity,
+    string? Location,
+    bool IsActive);

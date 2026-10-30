@@ -220,6 +220,14 @@ public class ReservationServiceTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(Items.FirstOrDefault(t => t.Id == id));
 
+        public Task<IReadOnlyList<RestaurantTable>> GetAvailableAsync(
+            DateOnly? reservationDate,
+            TimeOnly? reservationTime,
+            int? minCapacity,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<RestaurantTable>>(
+                Items.Where(t => t.IsActive).ToList());
+
         public Task<bool> NumberExistsAsync(
             int number,
             CancellationToken cancellationToken = default)

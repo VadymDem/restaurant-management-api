@@ -25,6 +25,20 @@ public class TablesController : ControllerBase
         return Ok(tables);
     }
 
+    [HttpGet("available")]
+    [Authorize]
+    public async Task<ActionResult<IReadOnlyList<RestaurantTableResponse>>> GetAvailable(
+        [FromQuery] DateOnly? date,
+        [FromQuery] TimeOnly? time,
+        [FromQuery] int? guests,
+        CancellationToken cancellationToken)
+    {
+        var tables = await _tableService.GetAvailableAsync(
+            date, time, guests, cancellationToken);
+
+        return Ok(tables);
+    }
+
     [HttpPost]
     [Authorize(Roles = Roles.Administrator)]
     public async Task<ActionResult<RestaurantTableResponse>> Create(
