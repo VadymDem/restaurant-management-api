@@ -1,15 +1,22 @@
-﻿
+
+using Microsoft.Extensions.Options;
 using RRMS.Application.DTOs.Reservations;
 using RRMS.Application.Exceptions;
 using RRMS.Application.Interfaces.Repositories;
+using RRMS.Application.Options;
 using RRMS.Application.Services;
 using RRMS.Domain.Entities;
 using RRMS.Domain.Enums;
+
+using MsOptions = Microsoft.Extensions.Options.Options;
 
 namespace RRMS.Application.Tests;
 
 public class ReservationServiceTests
 {
+    private static readonly DateTimeOffset Now =
+        new(2026, 1, 15, 12, 0, 0, TimeSpan.Zero);
+
     private readonly FakeReservationRepository _reservations = new();
     private readonly FakeRestaurantTableRepository _tables = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
@@ -30,7 +37,9 @@ public class ReservationServiceTests
         _service = new ReservationService(
             _reservations,
             _tables,
-            _unitOfWork);
+            _unitOfWork,
+            new FixedTimeProvider(Now),
+            MsOptions.Create(new RestaurantOptions()));
     }
 
     private static CreateReservationRequest ValidRequest(
@@ -39,7 +48,7 @@ public class ReservationServiceTests
     {
         return new CreateReservationRequest(
             tableId,
-            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+            DateOnly.FromDateTime(Now.UtcDateTime.AddDays(7)),
             new TimeOnly(18, 0),
             guestsCount,
             "Test reservation");
@@ -126,13 +135,36 @@ public class ReservationServiceTests
     {
         var request = new CreateReservationRequest(
             1,
-            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
+            DateOnly.FromDateTime(Now.UtcDateTime.AddDays(-1)),
             new TimeOnly(18, 0),
             2,
             null);
 
         await Assert.ThrowsAsync<ArgumentException>(
             () => _service.CreateAsync(_userId, request));
+    }
+
+    [Fact]
+    public async Task CreateAsync_ComparesAgainstConfiguredRestaurantTimeZone()
+    {
+        // 22:30 UTC is already 00:30 of the next day in Kyiv,
+        // so a slot at 23:00 of the previous local date is in the past.
+        var service = new ReservationService(
+            _reservations,
+            _tables,
+            _unitOfWork,
+            new FixedTimeProvider(new DateTimeOffset(2026, 1, 15, 22, 30, 0, TimeSpan.Zero)),
+            MsOptions.Create(new RestaurantOptions { TimeZone = "Europe/Kyiv" }));
+
+        var request = new CreateReservationRequest(
+            1,
+            new DateOnly(2026, 1, 15),
+            new TimeOnly(23, 0),
+            2,
+            null);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync(_userId, request));
     }
 
     [Fact]
@@ -149,6 +181,15 @@ public class ReservationServiceTests
         await Assert.ThrowsAsync<ArgumentException>(
             () => _service.CreateAsync(
                 _userId, ValidRequest(tableId: 0)));
+    }
+
+    private sealed class FixedTimeProvider : TimeProvider
+    {
+        private readonly DateTimeOffset _utcNow;
+
+        public FixedTimeProvider(DateTimeOffset utcNow) => _utcNow = utcNow;
+
+        public override DateTimeOffset GetUtcNow() => _utcNow;
     }
 
     private sealed class FakeReservationRepository : IReservationRepository
@@ -219,6 +260,14 @@ public class ReservationServiceTests
             long id,
             CancellationToken cancellationToken = default)
             => Task.FromResult(Items.FirstOrDefault(t => t.Id == id));
+
+        public Task<IReadOnlyList<RestaurantTable>> GetAvailableAsync(
+            DateOnly? reservationDate,
+            TimeOnly? reservationTime,
+            int? minCapacity,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<RestaurantTable>>(
+                Items.Where(t => t.IsActive).ToList());
 
         public Task<bool> NumberExistsAsync(
             int number,

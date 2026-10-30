@@ -1,4 +1,3 @@
-
 using RRMS.Application.DTOs.Menu;
 
 namespace RRMS.Application.Interfaces.Services;
@@ -6,6 +5,11 @@ namespace RRMS.Application.Interfaces.Services;
 public interface IMenuService
 {
     Task<IReadOnlyList<MenuItemResponse>> GetAllAsync(
+        bool includeUnavailable = false,
+        CancellationToken cancellationToken = default);
+
+    Task<MenuItemResponse> GetByIdAsync(
+        long id,
         CancellationToken cancellationToken = default);
 
     Task<MenuItemResponse> CreateAsync(

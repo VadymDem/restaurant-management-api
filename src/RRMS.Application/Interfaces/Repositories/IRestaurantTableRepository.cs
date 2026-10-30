@@ -11,6 +11,12 @@ public interface IRestaurantTableRepository
         long id,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<RestaurantTable>> GetAvailableAsync(
+        DateOnly? reservationDate,
+        TimeOnly? reservationTime,
+        int? minCapacity,
+        CancellationToken cancellationToken = default);
+
     Task<bool> NumberExistsAsync(
         int number,
         CancellationToken cancellationToken = default);

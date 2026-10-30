@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
         CancellationToken cancellationToken)
     {
         var response = await _authService.RegisterAsync(request, cancellationToken);
-        return Ok(response);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     [HttpPost("login")]

@@ -44,7 +44,7 @@ public static class DbSeeder
             return;
         }
 
-        email = email.Trim();
+        email = email.Trim().ToLowerInvariant();
 
         var userExists = await dbContext.Users.AnyAsync(
             u => u.Email == email,

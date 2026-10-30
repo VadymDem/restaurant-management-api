@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,29 @@ public static class ServiceCollectionExtensions
 
         services.Configure<JwtOptions>(jwtSection);
 
-        services.AddControllers();
+        services.AddOptions<RestaurantOptions>()
+            .Bind(configuration.GetSection(RestaurantOptions.SectionName))
+            .Validate(options =>
+            {
+                var timeZoneId = options.TimeZone;
+
+                if (OperatingSystem.IsWindows() &&
+                    timeZoneId == "Europe/Kyiv")
+                {
+                    timeZoneId = "FLE Standard Time";
+                }
+
+                return TimeZoneInfo.TryFindSystemTimeZoneById(
+                    timeZoneId, out _);
+            },
+            "Restaurant:TimeZone must be a valid time zone identifier.")
+            .ValidateOnStart();
+
+
+        services.AddControllers()
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(
+                    new JsonStringEnumConverter()));
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen(options =>
@@ -48,9 +71,15 @@ public static class ServiceCollectionExtensions
             });
         });
 
+        var allowedOrigins = configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? [];
+
         services.AddCors(options =>
             options.AddDefaultPolicy(policy =>
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

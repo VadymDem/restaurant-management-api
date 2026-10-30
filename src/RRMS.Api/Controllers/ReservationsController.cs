@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RRMS.Application.DTOs.Reservations;
+using RRMS.Application.Exceptions;
 using RRMS.Application.Interfaces.Services;
 
 namespace RRMS.Api.Controllers;
@@ -58,6 +59,13 @@ public class ReservationsController : ControllerBase
     private Guid GetCurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return Guid.Parse(value!);
+
+        if (!Guid.TryParse(value, out var userId))
+        {
+            throw new UnauthorizedException(
+                "The access token does not contain a valid user identifier.");
+        }
+
+        return userId;
     }
 }

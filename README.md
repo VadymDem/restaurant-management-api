@@ -90,11 +90,13 @@ Web API layer (entry point).
 |---------|----------------------------------|-----------------|----------------------------------|
 | POST    | `/api/auth/register`             | Public          | Register a customer account      |
 | POST    | `/api/auth/login`                | Public          | Authenticate and get JWT token   |
-| GET     | `/api/menu`                      | Public          | Get all menu items               |
+| GET     | `/api/menu`                      | Public          | Get menu items (unavailable hidden; `?includeUnavailable=true` — administrator only) |
+| GET     | `/api/menu/{id}`                 | Public          | Get a single menu item           |
 | POST    | `/api/menu`                      | Administrator   | Create menu item                 |
 | PUT     | `/api/menu/{id}`                 | Administrator   | Update menu item                 |
 | DELETE  | `/api/menu/{id}`                 | Administrator   | Delete menu item                 |
 | GET     | `/api/tables`                    | Authenticated   | Get all tables                   |
+| GET     | `/api/tables/available`          | Authenticated   | Get available tables (optional `date`, `time`, `guests`) |
 | POST    | `/api/tables`                    | Administrator   | Create a table                   |
 | PUT     | `/api/tables/{id}`               | Administrator   | Update a table                   |
 | DELETE  | `/api/tables/{id}`               | Administrator   | Delete a table                   |
@@ -105,6 +107,8 @@ Web API layer (entry point).
 | PUT     | `/api/admin/reservations/{id}/status` | Administrator | Update reservation status     |
 
 ## Reservation Statuses
+
+Statuses are exchanged as strings (`Pending`, `Confirmed`, `Cancelled`) both in requests and responses.
 
 - `Pending` — initial state after creation
 - `Confirmed` — set by administrator
@@ -146,6 +150,7 @@ $env:ConnectionStrings__SupabaseConnection = "Host=...;Database=...;Username=...
 $env:Jwt__Issuer = "rrms-api"
 $env:Jwt__Audience = "rrms-client"
 $env:Jwt__SecretKey = "random-secret-at-least-32-chars"
+$env:Restaurant__TimeZone = "Europe/Kyiv"
 $env:AdminSeed__Email = "admin@example.com"
 $env:AdminSeed__Password = "a-strong-password"
 ```
@@ -167,6 +172,15 @@ $env:AdminSeed__Password = "a-strong-password"
     "SecretKey": "your-secret-key-at-least-32-chars",
     "ExpirationMinutes": 60
   },
+  "Restaurant": {
+    "TimeZone": "Europe/Kyiv"
+  },
+  "Cors": {
+    "AllowedOrigins": [ "http://localhost:5173" ]
+  },
+  "Resend": {
+    "ApiKey": "your-resend-api-key"
+  },
   "AdminSeed": {
     "Name": "Administrator",
     "Email": "your-admin-email",
@@ -177,7 +191,23 @@ $env:AdminSeed__Password = "a-strong-password"
 
 `AdminSeed` is used on the first startup: if no users exist yet, it creates an administrator account (idempotent; skipped if empty).
 
+`Cors:AllowedOrigins` lists the browser origins allowed to call the API; when the list is empty, no
+cross-origin requests are allowed. `Resend:ApiKey` is required for welcome emails — when it is missing the
+registration still succeeds and the failure is logged as a warning.
+
 > **Never commit real credentials.** Use environment variables or a secrets manager in production.
+
+### Local Secrets
+
+`appsettings.Development.json` intentionally contains no credentials. Keep local values in
+[user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) (stored outside the repo,
+loaded automatically only in the Development environment):
+
+```bash
+dotnet user-secrets set "Jwt:SecretKey" "<random-secret-at-least-32-chars>" --project src/RRMS.Api
+dotnet user-secrets set "AdminSeed:Email" "admin@example.com" --project src/RRMS.Api
+dotnet user-secrets set "AdminSeed:Password" "<strong-password>" --project src/RRMS.Api
+```
 
 ### Database Migrations
 

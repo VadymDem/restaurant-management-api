@@ -4,4 +4,7 @@ public sealed record MenuItemResponse(
     long Id,
     string ItemName,
     string? Description,
-    decimal Price);
+    decimal Price,
+    string? Category,
+    string? ImageUrl,
+    bool IsAvailable);
