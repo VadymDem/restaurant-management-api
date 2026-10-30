@@ -108,6 +108,8 @@ Web API layer (entry point).
 
 ## Reservation Statuses
 
+Statuses are exchanged as strings (`Pending`, `Confirmed`, `Cancelled`) both in requests and responses.
+
 - `Pending` — initial state after creation
 - `Confirmed` — set by administrator
 - `Cancelled` — set by administrator or by the reservation owner
@@ -148,6 +150,7 @@ $env:ConnectionStrings__SupabaseConnection = "Host=...;Database=...;Username=...
 $env:Jwt__Issuer = "rrms-api"
 $env:Jwt__Audience = "rrms-client"
 $env:Jwt__SecretKey = "random-secret-at-least-32-chars"
+$env:Restaurant__TimeZone = "Europe/Kyiv"
 $env:AdminSeed__Email = "admin@example.com"
 $env:AdminSeed__Password = "a-strong-password"
 ```
@@ -168,6 +171,9 @@ $env:AdminSeed__Password = "a-strong-password"
     "Audience": "rrms-client",
     "SecretKey": "your-secret-key-at-least-32-chars",
     "ExpirationMinutes": 60
+  },
+  "Restaurant": {
+    "TimeZone": "Europe/Kyiv"
   },
   "AdminSeed": {
     "Name": "Administrator",

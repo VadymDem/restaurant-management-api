@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,18 @@ public static class ServiceCollectionExtensions
 
         services.Configure<JwtOptions>(jwtSection);
 
-        services.AddControllers();
+        services.AddOptions<RestaurantOptions>()
+            .Bind(configuration.GetSection(RestaurantOptions.SectionName))
+            .Validate(
+                options => TimeZoneInfo.TryFindSystemTimeZoneById(
+                    options.TimeZone, out _),
+                "Restaurant:TimeZone must be a valid time zone identifier.")
+            .ValidateOnStart();
+
+        services.AddControllers()
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(
+                    new JsonStringEnumConverter()));
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen(options =>

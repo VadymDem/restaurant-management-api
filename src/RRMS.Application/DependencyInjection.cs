@@ -14,6 +14,8 @@ public static class DependencyInjection
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
+        services.AddSingleton(TimeProvider.System);
+
         return services;
     }
 }

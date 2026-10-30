@@ -1,7 +1,9 @@
+using Microsoft.Extensions.Options;
 using RRMS.Application.DTOs.Reservations;
 using RRMS.Application.Exceptions;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Application.Interfaces.Services;
+using RRMS.Application.Options;
 using RRMS.Domain.Entities;
 using RRMS.Domain.Enums;
 
@@ -12,15 +14,21 @@ public class ReservationService : IReservationService
     private readonly IReservationRepository _reservations;
     private readonly IRestaurantTableRepository _tables;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly TimeProvider _timeProvider;
+    private readonly IOptions<RestaurantOptions> _restaurantOptions;
 
     public ReservationService(
         IReservationRepository reservations,
         IRestaurantTableRepository tables,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        TimeProvider timeProvider,
+        IOptions<RestaurantOptions> restaurantOptions)
     {
         _reservations = reservations;
         _tables = tables;
         _unitOfWork = unitOfWork;
+        _timeProvider = timeProvider;
+        _restaurantOptions = restaurantOptions;
     }
 
     public async Task<ReservationResponse> CreateAsync(
@@ -32,17 +40,12 @@ public class ReservationService : IReservationService
             throw new ArgumentException(
                 "Guest count must be greater than zero.");
 
-        var timeZoneId = OperatingSystem.IsWindows()
-            ? "FLE Standard Time"
-            : "Europe/Kyiv";
+        var restaurantTimeZone = TimeZoneInfo.FindSystemTimeZoneById(
+            _restaurantOptions.Value.TimeZone);
 
-        var restaurantTimeZone =
-            TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-
-        var currentRestaurantTime =
-            TimeZoneInfo.ConvertTimeFromUtc(
-                DateTime.UtcNow,
-                restaurantTimeZone);
+        var currentRestaurantTime = TimeZoneInfo.ConvertTime(
+            _timeProvider.GetUtcNow(),
+            restaurantTimeZone).DateTime;
 
         var reservationDateTime =
             request.ReservationDate.ToDateTime(
