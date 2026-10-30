@@ -40,8 +40,16 @@ public class ReservationService : IReservationService
             throw new ArgumentException(
                 "Guest count must be greater than zero.");
 
-        var restaurantTimeZone = TimeZoneInfo.FindSystemTimeZoneById(
-            _restaurantOptions.Value.TimeZone);
+        var timeZoneId = _restaurantOptions.Value.TimeZone;
+
+        if (OperatingSystem.IsWindows() &&
+            timeZoneId == "Europe/Kyiv")
+        {
+            timeZoneId = "FLE Standard Time";
+        }
+
+        var restaurantTimeZone =
+            TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
         var currentRestaurantTime = TimeZoneInfo.ConvertTime(
             _timeProvider.GetUtcNow(),

@@ -28,11 +28,22 @@ public static class ServiceCollectionExtensions
 
         services.AddOptions<RestaurantOptions>()
             .Bind(configuration.GetSection(RestaurantOptions.SectionName))
-            .Validate(
-                options => TimeZoneInfo.TryFindSystemTimeZoneById(
-                    options.TimeZone, out _),
-                "Restaurant:TimeZone must be a valid time zone identifier.")
+            .Validate(options =>
+            {
+                var timeZoneId = options.TimeZone;
+
+                if (OperatingSystem.IsWindows() &&
+                    timeZoneId == "Europe/Kyiv")
+                {
+                    timeZoneId = "FLE Standard Time";
+                }
+
+                return TimeZoneInfo.TryFindSystemTimeZoneById(
+                    timeZoneId, out _);
+            },
+            "Restaurant:TimeZone must be a valid time zone identifier.")
             .ValidateOnStart();
+
 
         services.AddControllers()
             .AddJsonOptions(options =>
