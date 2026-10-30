@@ -109,6 +109,108 @@ public class MenuServiceTests
         Assert.Equal(new[] { "Apple", "Banana" }, items.Select(i => i.ItemName));
     }
 
+    [Fact]
+    public async Task GetAllAsync_ExcludesUnavailableItemsByDefault()
+    {
+        _repository.Items.Add(new MenuItem { Id = 1, ItemName = "Visible", Price = 1m });
+        _repository.Items.Add(new MenuItem { Id = 2, ItemName = "Hidden", Price = 2m, IsAvailable = false });
+
+        var items = await _service.GetAllAsync();
+
+        Assert.Equal(new[] { "Visible" }, items.Select(i => i.ItemName));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_IncludesUnavailableItemsWhenRequested()
+    {
+        _repository.Items.Add(new MenuItem { Id = 1, ItemName = "Visible", Price = 1m });
+        _repository.Items.Add(new MenuItem { Id = 2, ItemName = "Hidden", Price = 2m, IsAvailable = false });
+
+        var items = await _service.GetAllAsync(includeUnavailable: true);
+
+        Assert.Equal(new[] { "Hidden", "Visible" }, items.Select(i => i.ItemName));
+    }
+
+    [Fact]
+    public async Task CreateAsync_MapsCategoryImageUrlAndAvailability()
+    {
+        var request = new MenuItemRequest
+        {
+            ItemName = "Soup",
+            Price = 4.5m,
+            Category = "  Starters  ",
+            ImageUrl = "  https://cdn.example.com/soup.png  "
+        };
+
+        var response = await _service.CreateAsync(request);
+
+        Assert.Equal("Starters", response.Category);
+        Assert.Equal("https://cdn.example.com/soup.png", response.ImageUrl);
+        Assert.True(response.IsAvailable);
+        Assert.Equal("Starters", _repository.Items.Single().Category);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("   ")]
+    public async Task CreateAsync_NormalizesBlankCategoryToNull(string? category)
+    {
+        var request = new MenuItemRequest
+        {
+            ItemName = "Soup",
+            Price = 4.5m,
+            Category = category
+        };
+
+        var response = await _service.CreateAsync(request);
+
+        Assert.Null(response.Category);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_UpdatesAvailability()
+    {
+        _repository.Items.Add(new MenuItem { Id = 1, ItemName = "Soup", Price = 4.5m });
+        var request = new MenuItemRequest
+        {
+            ItemName = "Soup",
+            Price = 4.5m,
+            IsAvailable = false
+        };
+
+        var response = await _service.UpdateAsync(1, request);
+
+        Assert.False(response.IsAvailable);
+        Assert.False(_repository.Items.Single().IsAvailable);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsMappedItem()
+    {
+        _repository.Items.Add(new MenuItem
+        {
+            Id = 5,
+            ItemName = "Soup",
+            Price = 4.5m,
+            Category = "Starters",
+            IsAvailable = false
+        });
+
+        var response = await _service.GetByIdAsync(5);
+
+        Assert.Equal(5, response.Id);
+        Assert.Equal("Soup", response.ItemName);
+        Assert.Equal("Starters", response.Category);
+        Assert.False(response.IsAvailable);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WhenItemMissing_ThrowsNotFound()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _service.GetByIdAsync(999));
+    }
+
     private sealed class FakeMenuItemRepository : IMenuItemRepository
     {
         public List<MenuItem> Items { get; } = new();
@@ -116,9 +218,12 @@ public class MenuServiceTests
         private long _nextId = 1;
 
         public Task<IReadOnlyList<MenuItem>> GetAllAsync(
+            bool includeUnavailable,
             CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<MenuItem>>(
-                Items.OrderBy(i => i.ItemName).ToList());
+                Items.Where(i => includeUnavailable || i.IsAvailable)
+                    .OrderBy(i => i.ItemName)
+                    .ToList());
 
         public Task<MenuItem?> GetByIdAsync(
             long id,

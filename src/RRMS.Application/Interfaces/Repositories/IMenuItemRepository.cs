@@ -5,6 +5,7 @@ namespace RRMS.Application.Interfaces.Repositories;
 public interface IMenuItemRepository
 {
     Task<IReadOnlyList<MenuItem>> GetAllAsync(
+        bool includeUnavailable,
         CancellationToken cancellationToken = default);
 
     Task<MenuItem?> GetByIdAsync(

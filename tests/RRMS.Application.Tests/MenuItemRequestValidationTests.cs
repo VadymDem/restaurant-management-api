@@ -68,6 +68,48 @@ public class MenuItemRequestValidationTests
         Assert.Empty(Validate(request));
     }
 
+    [Fact]
+    public void CategoryLongerThan50_IsInvalid()
+    {
+        var request = new MenuItemRequest
+        {
+            ItemName = "Item",
+            Price = 1m,
+            Category = new string('a', 51)
+        };
+
+        Assert.Contains(Validate(request), r => r.MemberNames.Contains("Category"));
+    }
+
+    [Fact]
+    public void ImageUrlLongerThan500_IsInvalid()
+    {
+        var request = new MenuItemRequest
+        {
+            ItemName = "Item",
+            Price = 1m,
+            ImageUrl = new string('a', 501)
+        };
+
+        Assert.Contains(Validate(request), r => r.MemberNames.Contains("ImageUrl"));
+    }
+
+    [Fact]
+    public void OptionalMenuFields_AreValid()
+    {
+        var request = new MenuItemRequest
+        {
+            ItemName = "Item",
+            Description = null,
+            Price = 1m,
+            Category = "Starters",
+            ImageUrl = "https://cdn.example.com/item.png",
+            IsAvailable = false
+        };
+
+        Assert.Empty(Validate(request));
+    }
+
     private static List<ValidationResult> Validate(MenuItemRequest request)
     {
         var results = new List<ValidationResult>();

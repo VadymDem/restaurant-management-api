@@ -1,4 +1,3 @@
-
 using RRMS.Application.DTOs.Menu;
 using RRMS.Application.Exceptions;
 using RRMS.Application.Interfaces.Repositories;
@@ -21,10 +20,25 @@ public class MenuService : IMenuService
     }
 
     public async Task<IReadOnlyList<MenuItemResponse>> GetAllAsync(
+        bool includeUnavailable = false,
         CancellationToken cancellationToken = default)
     {
-        var items = await _menuItemRepository.GetAllAsync(cancellationToken);
+        var items = await _menuItemRepository.GetAllAsync(
+            includeUnavailable, cancellationToken);
+
         return items.Select(Map).ToList();
+    }
+
+    public async Task<MenuItemResponse> GetByIdAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        var item = await _menuItemRepository.GetByIdAsync(
+            id, cancellationToken)
+            ?? throw new NotFoundException(
+                $"Menu item with id '{id}' was not found.");
+
+        return Map(item);
     }
 
     public async Task<MenuItemResponse> CreateAsync(
@@ -34,8 +48,11 @@ public class MenuService : IMenuService
         var item = new MenuItem
         {
             ItemName = request.ItemName.Trim(),
-            Description = NormalizeDescription(request.Description),
-            Price = request.Price
+            Description = Normalize(request.Description),
+            Price = request.Price,
+            Category = Normalize(request.Category),
+            ImageUrl = Normalize(request.ImageUrl),
+            IsAvailable = request.IsAvailable
         };
 
         await _menuItemRepository.AddAsync(item, cancellationToken);
@@ -55,8 +72,11 @@ public class MenuService : IMenuService
                 $"Menu item with id '{id}' was not found.");
 
         item.ItemName = request.ItemName.Trim();
-        item.Description = NormalizeDescription(request.Description);
+        item.Description = Normalize(request.Description);
         item.Price = request.Price;
+        item.Category = Normalize(request.Category);
+        item.ImageUrl = Normalize(request.ImageUrl);
+        item.IsAvailable = request.IsAvailable;
 
         _menuItemRepository.Update(item);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -77,11 +97,18 @@ public class MenuService : IMenuService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    private static string? NormalizeDescription(string? description)
-        => string.IsNullOrWhiteSpace(description)
+    private static string? Normalize(string? value)
+        => string.IsNullOrWhiteSpace(value)
             ? null
-            : description.Trim();
+            : value.Trim();
 
     private static MenuItemResponse Map(MenuItem item)
-        => new(item.Id, item.ItemName, item.Description, item.Price);
+        => new(
+            item.Id,
+            item.ItemName,
+            item.Description,
+            item.Price,
+            item.Category,
+            item.ImageUrl,
+            item.IsAvailable);
 }

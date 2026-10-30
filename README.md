@@ -90,7 +90,8 @@ Web API layer (entry point).
 |---------|----------------------------------|-----------------|----------------------------------|
 | POST    | `/api/auth/register`             | Public          | Register a customer account      |
 | POST    | `/api/auth/login`                | Public          | Authenticate and get JWT token   |
-| GET     | `/api/menu`                      | Public          | Get all menu items               |
+| GET     | `/api/menu`                      | Public          | Get menu items (unavailable hidden; `?includeUnavailable=true` — administrator only) |
+| GET     | `/api/menu/{id}`                 | Public          | Get a single menu item           |
 | POST    | `/api/menu`                      | Administrator   | Create menu item                 |
 | PUT     | `/api/menu/{id}`                 | Administrator   | Update menu item                 |
 | DELETE  | `/api/menu/{id}`                 | Administrator   | Delete menu item                 |

@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RRMS.Application.DTOs.Menu;
@@ -21,10 +20,28 @@ public class MenuController : ControllerBase
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IReadOnlyList<MenuItemResponse>>> GetAll(
+        [FromQuery] bool includeUnavailable,
         CancellationToken cancellationToken)
     {
-        var items = await _menuService.GetAllAsync(cancellationToken);
+        if (includeUnavailable && !User.IsInRole(Roles.Administrator))
+        {
+            return Forbid();
+        }
+
+        var items = await _menuService.GetAllAsync(
+            includeUnavailable, cancellationToken);
+
         return Ok(items);
+    }
+
+    [HttpGet("{id:long}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<MenuItemResponse>> GetById(
+        long id,
+        CancellationToken cancellationToken)
+    {
+        var item = await _menuService.GetByIdAsync(id, cancellationToken);
+        return Ok(item);
     }
 
     [HttpPost]
@@ -36,7 +53,8 @@ public class MenuController : ControllerBase
         var item = await _menuService.CreateAsync(
             request, cancellationToken);
 
-        return CreatedAtAction(nameof(GetAll), item);
+        return CreatedAtAction(
+            nameof(GetById), new { id = item.Id }, item);
     }
 
     [HttpPut("{id:long}")]

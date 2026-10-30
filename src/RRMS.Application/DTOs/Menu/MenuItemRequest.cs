@@ -18,4 +18,12 @@ public sealed record MenuItemRequest
         ParseLimitsInInvariantCulture = true)]
     [DecimalPlaces(2)]
     public decimal Price { get; init; }
+
+    [StringLength(50)]
+    public string? Category { get; init; }
+
+    [StringLength(500)]
+    public string? ImageUrl { get; init; }
+
+    public bool IsAvailable { get; init; } = true;
 }

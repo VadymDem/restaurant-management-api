@@ -16,11 +16,17 @@ public class MenuItemRepository : IMenuItemRepository
     }
 
     public async Task<IReadOnlyList<MenuItem>> GetAllAsync(
+        bool includeUnavailable,
         CancellationToken cancellationToken = default)
-        => await _dbContext.MenuItems
+    {
+        var query = _dbContext.MenuItems
             .AsNoTracking()
+            .Where(m => includeUnavailable || m.IsAvailable);
+
+        return await query
             .OrderBy(m => m.ItemName)
             .ToListAsync(cancellationToken);
+    }
 
     public Task<MenuItem?> GetByIdAsync(
         long id,
