@@ -60,9 +60,15 @@ public static class ServiceCollectionExtensions
             });
         });
 
+        var allowedOrigins = configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? [];
+
         services.AddCors(options =>
             options.AddDefaultPolicy(policy =>
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

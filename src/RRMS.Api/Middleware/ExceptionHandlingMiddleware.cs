@@ -55,20 +55,29 @@ public class ExceptionHandlingMiddleware
                 ex.Message);
         }
         catch (DbUpdateException ex)
-            when (ex.InnerException is PostgresException
-            {
-                SqlState: PostgresErrorCodes.UniqueViolation,
-                ConstraintName: "ux_reservations_table_slot"
-            })
+            when (ex.InnerException is PostgresException postgresException)
         {
-            _logger.LogWarning(
-                ex,
-                "Reservation slot conflict.");
+            var (statusCode, message) = MapDatabaseError(postgresException);
 
-            await WriteProblemAsync(
-                context,
-                StatusCodes.Status409Conflict,
-                "The selected table is already booked for this date and time.");
+            if (statusCode >= StatusCodes.Status500InternalServerError)
+            {
+                _logger.LogError(
+                    ex,
+                    "Database error {SqlState} ({Constraint}) on {Path}.",
+                    postgresException.SqlState,
+                    postgresException.ConstraintName,
+                    context.Request.Path);
+            }
+            else
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Constraint {Constraint} rejected the request on {Path}.",
+                    postgresException.ConstraintName,
+                    context.Request.Path);
+            }
+
+            await WriteProblemAsync(context, statusCode, message);
         }
         catch (Exception ex)
         {
@@ -87,6 +96,34 @@ public class ExceptionHandlingMiddleware
                 message);
         }
     }
+
+    private static (int StatusCode, string Message) MapDatabaseError(
+        PostgresException exception)
+        => exception.SqlState switch
+        {
+            PostgresErrorCodes.UniqueViolation => (
+                StatusCodes.Status409Conflict,
+                exception.ConstraintName switch
+                {
+                    "ux_reservations_table_slot" =>
+                        "The selected table is already booked for this date and time.",
+                    "ix_users_email" =>
+                        "A user with this email already exists.",
+                    "Tables_table_number_key" =>
+                        "A table with this number already exists.",
+                    _ =>
+                        "The request conflicts with an existing record."
+                }),
+            PostgresErrorCodes.ForeignKeyViolation => (
+                StatusCodes.Status409Conflict,
+                "The request references a record that does not exist."),
+            PostgresErrorCodes.CheckViolation => (
+                StatusCodes.Status400BadRequest,
+                "The request violates a data constraint."),
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "An unexpected database error occurred while processing the request.")
+        };
 
     private static async Task WriteProblemAsync(
         HttpContext context,

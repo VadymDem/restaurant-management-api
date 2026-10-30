@@ -175,6 +175,12 @@ $env:AdminSeed__Password = "a-strong-password"
   "Restaurant": {
     "TimeZone": "Europe/Kyiv"
   },
+  "Cors": {
+    "AllowedOrigins": [ "http://localhost:5173" ]
+  },
+  "Resend": {
+    "ApiKey": "your-resend-api-key"
+  },
   "AdminSeed": {
     "Name": "Administrator",
     "Email": "your-admin-email",
@@ -184,6 +190,10 @@ $env:AdminSeed__Password = "a-strong-password"
 ```
 
 `AdminSeed` is used on the first startup: if no users exist yet, it creates an administrator account (idempotent; skipped if empty).
+
+`Cors:AllowedOrigins` lists the browser origins allowed to call the API; when the list is empty, no
+cross-origin requests are allowed. `Resend:ApiKey` is required for welcome emails — when it is missing the
+registration still succeeds and the failure is logged as a warning.
 
 > **Never commit real credentials.** Use environment variables or a secrets manager in production.
 

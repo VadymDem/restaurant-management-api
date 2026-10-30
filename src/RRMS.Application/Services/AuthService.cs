@@ -31,8 +31,10 @@ public class AuthService : IAuthService
         LoginRequest request,
         CancellationToken cancellationToken = default)
     {
+        var email = request.Email.Trim().ToLowerInvariant();
+
         var user = await _unitOfWork.Users.GetByEmailAsync(
-            request.Email.Trim(),
+            email,
             cancellationToken);
 
         if (user is null)
