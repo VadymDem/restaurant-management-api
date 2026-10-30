@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using RRMS.Application.DTOs.Auth;
 using RRMS.Application.Exceptions;
 using RRMS.Application.Interfaces.Repositories;
@@ -12,15 +13,18 @@ public class AuthService : IAuthService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IEmailService _emailService;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
      IUnitOfWork unitOfWork,
      IJwtTokenService jwtTokenService,
-     IEmailService emailService)
+     IEmailService emailService,
+     ILogger<AuthService> logger)
     {
         _unitOfWork = unitOfWork;
         _jwtTokenService = jwtTokenService;
         _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<LoginResponse> LoginAsync(
@@ -88,9 +92,14 @@ public class AuthService : IAuthService
                 user.Name,
                 cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
-            // Registration should still succeed even if the welcome email fails.
+            // Registration should still succeed even if the welcome email fails,
+            // but the failure must stay visible in the logs.
+            _logger.LogWarning(
+                ex,
+                "Failed to send welcome email to {Email}.",
+                user.Email);
         }
 
         var token = _jwtTokenService.GenerateToken(user);

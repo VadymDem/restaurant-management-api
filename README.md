@@ -180,6 +180,18 @@ $env:AdminSeed__Password = "a-strong-password"
 
 > **Never commit real credentials.** Use environment variables or a secrets manager in production.
 
+### Local Secrets
+
+`appsettings.Development.json` intentionally contains no credentials. Keep local values in
+[user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) (stored outside the repo,
+loaded automatically only in the Development environment):
+
+```bash
+dotnet user-secrets set "Jwt:SecretKey" "<random-secret-at-least-32-chars>" --project src/RRMS.Api
+dotnet user-secrets set "AdminSeed:Email" "admin@example.com" --project src/RRMS.Api
+dotnet user-secrets set "AdminSeed:Password" "<strong-password>" --project src/RRMS.Api
+```
+
 ### Database Migrations
 
 ```bash
