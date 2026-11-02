@@ -63,6 +63,9 @@ function Header() {
               <NavLink to="/reservations" className={navLinkClass} onClick={closeMenu}>
                 Reserve
               </NavLink>
+              <NavLink to="/my-reservations" className={navLinkClass} onClick={closeMenu}>
+                My reservations
+              </NavLink>
               {administrator && (
                 <NavLink to="/admin/menu" className={navLinkClass} onClick={closeMenu}>
                   Manage menu

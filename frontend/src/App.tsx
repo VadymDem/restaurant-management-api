@@ -7,6 +7,7 @@ import AdminMenuPage from './pages/AdminMenuPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import MenuPage from './pages/MenuPage'
+import MyReservationsPage from './pages/MyReservationsPage'
 import RegisterPage from './pages/RegisterPage'
 import ReservationPage from './pages/ReservationPage'
 
@@ -55,6 +56,17 @@ function App() {
           <Layout fullWidth>
             <AuthenticatedRoute>
               <ReservationPage />
+            </AuthenticatedRoute>
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/my-reservations"
+        element={
+          <Layout fullWidth>
+            <AuthenticatedRoute>
+              <MyReservationsPage />
             </AuthenticatedRoute>
           </Layout>
         }

@@ -90,3 +90,7 @@ export function createReservation(
     body: JSON.stringify(reservation),
   })
 }
+
+export function getMyReservations(): Promise<Reservation[]> {
+  return authenticatedRequest<Reservation[]>('/api/Reservations/my')
+}

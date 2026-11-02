@@ -113,21 +113,18 @@ public class ReservationService : IReservationService
         await _unitOfWork.SaveChangesAsync(
             cancellationToken);
 
-        return new ReservationResponse(
-            reservation.Id,
-            reservation.UserId,
-            reservation.TableId,
-            reservation.ReservationDate,
-            reservation.ReservationTime,
-            reservation.GuestsCount,
-            reservation.Notes,
-            reservation.Status);
+        return Map(reservation);
     }
 
-    public Task<IReadOnlyList<ReservationResponse>> GetForUserAsync(
+    public async Task<IReadOnlyList<ReservationResponse>> GetForUserAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        var reservations = await _reservations.GetByUserAsync(
+            userId, cancellationToken);
+
+        return reservations.Select(Map).ToList();
+    }
 
     public Task CancelAsync(
         Guid userId,
@@ -144,4 +141,15 @@ public class ReservationService : IReservationService
         ReservationStatus status,
         CancellationToken cancellationToken = default)
         => throw new NotImplementedException();
+
+    private static ReservationResponse Map(Reservation reservation)
+        => new(
+            reservation.Id,
+            reservation.UserId,
+            reservation.TableId,
+            reservation.ReservationDate,
+            reservation.ReservationTime,
+            reservation.GuestsCount,
+            reservation.Notes,
+            reservation.Status);
 }
