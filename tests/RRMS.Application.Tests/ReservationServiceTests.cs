@@ -69,6 +69,41 @@ public class ReservationServiceTests
     }
 
     [Fact]
+    public async Task GetForUserAsync_ReturnsOnlyUsersReservations()
+    {
+        _reservations.Items.AddRange([
+            new Reservation
+            {
+                Id = 10,
+                UserId = _userId,
+                TableId = 1,
+                ReservationDate = new DateOnly(2026, 2, 10),
+                ReservationTime = new TimeOnly(19, 30),
+                GuestsCount = 3,
+                Notes = "Window table",
+                Status = ReservationStatus.Confirmed
+            },
+            new Reservation
+            {
+                Id = 11,
+                UserId = Guid.NewGuid(),
+                TableId = 1,
+                ReservationDate = new DateOnly(2026, 2, 11),
+                ReservationTime = new TimeOnly(18, 0),
+                GuestsCount = 2,
+                Status = ReservationStatus.Pending
+            }
+        ]);
+
+        var result = await _service.GetForUserAsync(_userId);
+
+        var reservation = Assert.Single(result);
+        Assert.Equal(10, reservation.Id);
+        Assert.Equal(ReservationStatus.Confirmed, reservation.Status);
+        Assert.Equal("Window table", reservation.Notes);
+    }
+
+    [Fact]
     public async Task CreateAsync_NonexistentTable_ThrowsNotFound()
     {
         await Assert.ThrowsAsync<NotFoundException>(

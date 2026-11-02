@@ -13,6 +13,7 @@ function Footer() {
         <nav className="footer-navigation" aria-label="Footer navigation">
           <Link to="/">Home</Link>
           <Link to="/menu">Menu</Link>
+          <Link to="/reservations">Reserve</Link>
           <Link to="/login">Log in</Link>
         </nav>
 

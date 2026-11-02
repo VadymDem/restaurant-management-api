@@ -1,0 +1,402 @@
+.my-reservations-page {
+  min-height: 720px;
+  color: #2c211a;
+  background: #f7f2ec;
+}
+
+.my-reservations-hero {
+  display: flex;
+  min-height: 315px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 78px max(24px, calc((100vw - 1160px) / 2)) 72px;
+  color: #ffffff;
+  background:
+    linear-gradient(90deg, rgba(27, 15, 9, 0.92), rgba(27, 15, 9, 0.46)),
+    url('../assets/restaurant-interior.jpg') center 58% / cover;
+}
+
+.my-reservations-hero > div {
+  max-width: 680px;
+}
+
+.my-reservations-hero .reservation-eyebrow {
+  color: #efb57f;
+}
+
+.my-reservations-hero h1 {
+  margin: 10px 0 14px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(46px, 7vw, 68px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.my-reservations-hero > div > p:last-child {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.my-reservations-hero > a {
+  display: inline-flex;
+  min-height: 50px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 22px;
+  padding: 13px 20px;
+  border-radius: 999px;
+  color: #28180f;
+  background: #e5a66d;
+  font-size: 14px;
+  font-weight: 800;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.my-reservations-hero > a:hover {
+  background: #f0bc8d;
+  transform: translateY(-2px);
+}
+
+.my-reservations-content {
+  width: min(1040px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 58px 0 100px;
+}
+
+.my-reservations-success {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 42px;
+  padding: 18px 22px;
+  border: 1px solid #b8d3b7;
+  border-radius: 12px;
+  color: #2d522d;
+  background: #f3faf2;
+}
+
+.my-reservations-success > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #477446;
+  font-weight: 800;
+}
+
+.my-reservations-success p {
+  margin: 3px 0 0;
+  color: #577057;
+  font-size: 13px;
+}
+
+.my-reservations-group + .my-reservations-group {
+  margin-top: 68px;
+}
+
+.my-reservations-group__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.my-reservations-group__heading h2 {
+  margin: 8px 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 500;
+}
+
+.my-reservations-group__heading > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid #d7c9bd;
+  border-radius: 50%;
+  color: #8b4513;
+  background: #fffdfa;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+}
+
+.my-reservations-list {
+  display: grid;
+  gap: 16px;
+}
+
+.my-reservation-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid #e1d7ce;
+  border-radius: 16px;
+  background: #fffdfa;
+  box-shadow: 0 10px 30px rgba(55, 35, 22, 0.07);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.my-reservation-card:hover {
+  border-color: #c8b4a4;
+  box-shadow: 0 16px 36px rgba(55, 35, 22, 0.11);
+  transform: translateY(-2px);
+}
+
+.my-reservation-card__date {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  color: #f8eee6;
+  background: #2b1c14;
+}
+
+.my-reservation-card__date strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.my-reservation-card__date span {
+  color: #dda169;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.my-reservation-card__content {
+  padding: 24px 28px;
+}
+
+.my-reservation-card__title {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.my-reservation-card__title p {
+  margin: 0 0 5px;
+  color: #786d65;
+  font-size: 13px;
+}
+
+.my-reservation-card__title h3 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.reservation-status {
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reservation-status--pending {
+  color: #82501f;
+  background: #fff1d9;
+}
+
+.reservation-status--confirmed {
+  color: #315d3c;
+  background: #e8f4e9;
+}
+
+.reservation-status--cancelled {
+  color: #914137;
+  background: #fbe9e7;
+}
+
+.reservation-status--completed {
+  color: #5f596a;
+  background: #eeebf2;
+}
+
+.my-reservation-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 34px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #eee6df;
+}
+
+.my-reservation-card__meta > span {
+  display: grid;
+  gap: 4px;
+}
+
+.my-reservation-card__meta small {
+  color: #9a8c82;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.my-reservation-card__meta strong {
+  color: #40362f;
+  font-size: 13px;
+}
+
+.my-reservation-card__notes {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: #665b53;
+  background: #f6f1ec;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.my-reservation-card__notes span {
+  margin-right: 5px;
+  color: #9d5421;
+  font-weight: 800;
+}
+
+.my-reservation-card__reference {
+  position: absolute;
+  right: 12px;
+  bottom: 9px;
+  color: #c0b5ac;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.my-reservations-group--past .my-reservation-card {
+  opacity: 0.82;
+  box-shadow: none;
+}
+
+.my-reservations-empty {
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  align-content: center;
+  padding: 54px 24px;
+  border: 1px solid #dfd4ca;
+  border-radius: 18px;
+  background: #fffdfa;
+  text-align: center;
+}
+
+.my-reservations-empty > span {
+  display: grid;
+  width: 66px;
+  height: 66px;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  color: #f5e8dc;
+  background: #2d1d15;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 31px;
+  font-style: italic;
+}
+
+.my-reservations-empty h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.my-reservations-empty p {
+  max-width: 500px;
+  margin: 12px 0 0;
+  color: #766a61;
+  line-height: 1.65;
+}
+
+.my-reservations-empty a,
+.my-reservations-empty button {
+  margin-top: 24px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: #8b4513;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.my-reservations-empty--error {
+  border-color: #e4b9b4;
+  background: #fff8f7;
+}
+
+.my-reservations-empty--error > span {
+  background: #9f392f;
+  font-style: normal;
+}
+
+.my-reservations-loading {
+  display: grid;
+  gap: 16px;
+}
+
+.my-reservations-loading div {
+  min-height: 180px;
+  border-radius: 16px;
+  background: linear-gradient(100deg, #e9e1d9 30%, #f8f4ef 50%, #e9e1d9 70%);
+  background-size: 250% 100%;
+  animation: reservation-loading 1.4s ease-in-out infinite;
+}
+
+@media (max-width: 700px) {
+  .my-reservations-hero {
+    min-height: 390px;
+    flex-direction: column;
+    align-items: start;
+    justify-content: end;
+    padding: 62px 20px 54px;
+  }
+
+  .my-reservations-content {
+    width: calc(100% - 28px);
+    padding: 42px 0 70px;
+  }
+
+  .my-reservation-card {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .my-reservation-card__content {
+    padding: 20px 16px;
+  }
+
+  .my-reservation-card__title {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .my-reservation-card__meta {
+    gap: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .my-reservations-loading div {
+    animation: none;
+  }
+}

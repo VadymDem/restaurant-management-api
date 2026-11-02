@@ -58,6 +58,7 @@ a {
     url('./assets/restaurant-interior.jpg');
   background-position: center;
   background-size: cover;
+  background-attachment: fixed;
 }
 
 .auth-card {
@@ -215,6 +216,8 @@ a {
   .auth-section {
     min-height: calc(100vh - 128px);
     padding: 36px 16px;
+    background-attachment: scroll;
+    background-size: auto 100vh;
   }
 
   .auth-heading h1 {

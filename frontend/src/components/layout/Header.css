@@ -110,6 +110,25 @@
   transform: translateY(-1px);
 }
 
+.navigation__logout {
+  margin-left: 6px;
+  padding: 11px 17px;
+  border: 1px solid #d8c9bc;
+  border-radius: 999px;
+  color: #6f350e;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.navigation__logout:hover {
+  color: #ffffff;
+  background: #6f350e;
+}
+
 .navigation-toggle {
   display: none;
   width: 44px;
@@ -197,6 +216,12 @@
     margin: 8px 0 0;
     padding: 14px 18px;
     text-align: center;
+  }
+
+  .navigation__logout {
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 13px 18px;
   }
 }
 
