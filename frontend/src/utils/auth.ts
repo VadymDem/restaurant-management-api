@@ -59,3 +59,19 @@ export function isAdministrator(): boolean {
     ? role.includes('Administrator')
     : role === 'Administrator'
 }
+
+export function isAuthenticated(): boolean {
+  const token = localStorage.getItem('authToken')
+
+  if (!token) {
+    return false
+  }
+
+  const payload = decodeJwtPayload(token)
+
+  return Boolean(
+    payload &&
+      typeof payload.exp === 'number' &&
+      payload.exp * 1000 > Date.now(),
+  )
+}

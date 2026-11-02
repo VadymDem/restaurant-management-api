@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { loginUser } from '../services/authService'
 
 interface LoginFormValues {
@@ -33,6 +33,7 @@ function validateForm(values: LoginFormValues): LoginFormErrors {
 
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [values, setValues] = useState(initialFormValues)
   const [errors, setErrors] = useState<LoginFormErrors>({})
   const [serverError, setServerError] = useState('')
@@ -73,7 +74,7 @@ function LoginPage() {
         password: values.password,
       })
 
-     localStorage.setItem('authToken', response.token)
+      localStorage.setItem('authToken', response.token)
 
 const payload = JSON.parse(
   atob(response.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
@@ -84,13 +85,14 @@ const role =
   payload.roles ??
   payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
 
-navigate(
-  role === 'Administrator' ||
-    (Array.isArray(role) && role.includes('Administrator'))
-    ? '/admin/menu'
-    : '/',
-  { replace: true },
-)
+      const requestedPath = (location.state as { from?: string } | null)?.from
+      const isAdmin =
+        role === 'Administrator' ||
+        (Array.isArray(role) && role.includes('Administrator'))
+
+      navigate(requestedPath ?? (isAdmin ? '/admin/menu' : '/reservations'), {
+        replace: true,
+      })
     } catch (error) {
       setServerError(
         error instanceof Error

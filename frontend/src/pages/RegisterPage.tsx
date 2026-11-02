@@ -96,7 +96,7 @@ function RegisterPage() {
       })
 
       localStorage.setItem('authToken', response.token)
-      navigate('/')
+      navigate('/reservations', { replace: true })
     } catch (error) {
       setServerError(
         error instanceof Error

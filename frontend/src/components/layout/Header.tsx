@@ -1,14 +1,24 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { isAdministrator, isAuthenticated } from '../../utils/auth'
 import './Header.css'
 
 function Header() {
+  const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const authenticated = isAuthenticated()
+  const administrator = isAdministrator()
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `navigation__link${isActive ? ' navigation__link--active' : ''}`
 
   const closeMenu = () => setMenuOpen(false)
+
+  function handleLogout() {
+    localStorage.removeItem('authToken')
+    closeMenu()
+    navigate('/', { replace: true })
+  }
 
   return (
     <header className="app-header">
@@ -48,12 +58,30 @@ function Header() {
           <NavLink to="/menu" className={navLinkClass} onClick={closeMenu}>
             Our menu
           </NavLink>
-          <NavLink to="/login" className={navLinkClass} onClick={closeMenu}>
-            Log in
-          </NavLink>
-          <Link to="/register" className="navigation__cta" onClick={closeMenu}>
-            Create account
-          </Link>
+          {authenticated ? (
+            <>
+              <NavLink to="/reservations" className={navLinkClass} onClick={closeMenu}>
+                Reserve
+              </NavLink>
+              {administrator && (
+                <NavLink to="/admin/menu" className={navLinkClass} onClick={closeMenu}>
+                  Manage menu
+                </NavLink>
+              )}
+              <button className="navigation__logout" type="button" onClick={handleLogout}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className={navLinkClass} onClick={closeMenu}>
+                Log in
+              </NavLink>
+              <Link to="/register" className="navigation__cta" onClick={closeMenu}>
+                Create account
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
