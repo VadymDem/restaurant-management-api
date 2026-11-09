@@ -132,15 +132,60 @@ public class ReservationService : IReservationService
         CancellationToken cancellationToken = default)
         => throw new NotImplementedException();
 
-    public Task<IReadOnlyList<ReservationResponse>> GetAllAsync(
+    public async Task<IReadOnlyList<ReservationResponse>> GetAllAsync(
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        var reservations = await _reservations.GetAllAsync(
+            cancellationToken);
 
-    public Task<ReservationResponse> UpdateStatusAsync(
+        return reservations.Select(Map).ToList();
+    }
+
+    public async Task<ReservationResponse> UpdateStatusAsync(
         long reservationId,
         ReservationStatus status,
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        if (!Enum.IsDefined(status))
+        {
+            throw new ArgumentException("Reservation status is not defined.");
+        }
+
+        var reservation = await _reservations.GetByIdAsync(
+            reservationId, cancellationToken)
+            ?? throw new NotFoundException(
+                $"Reservation with id '{reservationId}' was not found.");
+
+        if (!IsStatusTransitionAllowed(reservation.Status, status))
+        {
+            throw new ConflictException(
+                $"Reservation status cannot be changed " +
+                $"from '{reservation.Status}' to '{status}'.");
+        }
+
+        reservation.Status = status;
+
+        _reservations.Update(reservation);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Map(reservation);
+    }
+
+    private static bool IsStatusTransitionAllowed(
+        ReservationStatus current,
+        ReservationStatus next)
+        => current switch
+        {
+            ReservationStatus.Pending => next
+                is ReservationStatus.Confirmed
+                or ReservationStatus.Cancelled
+                or ReservationStatus.Completed,
+            ReservationStatus.Confirmed => next
+                is ReservationStatus.Cancelled
+                or ReservationStatus.Completed,
+            // Cancelled and Completed are terminal states.
+            _ => false
+        };
 
     private static ReservationResponse Map(Reservation reservation)
         => new(

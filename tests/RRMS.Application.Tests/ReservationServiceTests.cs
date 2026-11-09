@@ -218,6 +218,112 @@ public class ReservationServiceTests
                 _userId, ValidRequest(tableId: 0)));
     }
 
+    [Fact]
+    public async Task GetAllAsync_MapsReservations()
+    {
+        _reservations.Items.Add(new Reservation
+        {
+            Id = 11,
+            UserId = _userId,
+            TableId = 1,
+            ReservationDate = new DateOnly(2026, 2, 1),
+            ReservationTime = new TimeOnly(18, 0),
+            GuestsCount = 2,
+            Status = ReservationStatus.Confirmed,
+            Notes = "window seat"
+        });
+
+        var items = await _service.GetAllAsync();
+
+        var item = Assert.Single(items);
+        Assert.Equal(11, item.Id);
+        Assert.Equal(_userId, item.UserId);
+        Assert.Equal(1, item.TableId);
+        Assert.Equal(new DateOnly(2026, 2, 1), item.ReservationDate);
+        Assert.Equal(new TimeOnly(18, 0), item.ReservationTime);
+        Assert.Equal(2, item.GuestsCount);
+        Assert.Equal(ReservationStatus.Confirmed, item.Status);
+        Assert.Equal("window seat", item.Notes);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_NoReservations_ReturnsEmptyList()
+    {
+        var items = await _service.GetAllAsync();
+
+        Assert.Empty(items);
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_UpdatesStatusAndSaves()
+    {
+        _reservations.Items.Add(new Reservation
+        {
+            Id = 3,
+            UserId = _userId,
+            TableId = 1,
+            ReservationDate = new DateOnly(2026, 2, 1),
+            ReservationTime = new TimeOnly(18, 0),
+            GuestsCount = 2,
+            Status = ReservationStatus.Pending
+        });
+
+        var response = await _service.UpdateStatusAsync(
+            3, ReservationStatus.Confirmed);
+
+        Assert.Equal(ReservationStatus.Confirmed, response.Status);
+        Assert.Equal(
+            ReservationStatus.Confirmed,
+            _reservations.Items.Single().Status);
+        Assert.Equal(1, _unitOfWork.SaveCount);
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_MissingReservation_ThrowsNotFound()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _service.UpdateStatusAsync(999, ReservationStatus.Confirmed));
+    }
+
+    [Theory]
+    [InlineData(ReservationStatus.Confirmed)]
+    [InlineData(ReservationStatus.Completed)]
+    public async Task UpdateStatusAsync_FromCancelled_ThrowsConflict(
+        ReservationStatus next)
+    {
+        _reservations.Items.Add(new Reservation
+        {
+            Id = 4,
+            UserId = _userId,
+            TableId = 1,
+            ReservationDate = new DateOnly(2026, 2, 1),
+            ReservationTime = new TimeOnly(18, 0),
+            GuestsCount = 2,
+            Status = ReservationStatus.Cancelled
+        });
+
+        await Assert.ThrowsAsync<ConflictException>(
+            () => _service.UpdateStatusAsync(4, next));
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_FromCompleted_ThrowsConflict()
+    {
+        _reservations.Items.Add(new Reservation
+        {
+            Id = 5,
+            UserId = _userId,
+            TableId = 1,
+            ReservationDate = new DateOnly(2026, 2, 1),
+            ReservationTime = new TimeOnly(18, 0),
+            GuestsCount = 2,
+            Status = ReservationStatus.Completed
+        });
+
+        await Assert.ThrowsAsync<ConflictException>(
+            () => _service.UpdateStatusAsync(5, ReservationStatus.Confirmed));
+    }
+
     private sealed class FixedTimeProvider : TimeProvider
     {
         private readonly DateTimeOffset _utcNow;
