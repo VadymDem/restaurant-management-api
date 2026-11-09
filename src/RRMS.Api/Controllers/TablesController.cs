@@ -49,10 +49,11 @@ public class TablesController : ControllerBase
         return CreatedAtAction(nameof(GetAll), table);
     }
 
-    [HttpPut("{id:guid}")]
+
+    [HttpPut("{id:long}")]
     [Authorize(Roles = Roles.Administrator)]
     public async Task<ActionResult<RestaurantTableResponse>> Update(
-        Guid id,
+        long id,
         [FromBody] RestaurantTableRequest request,
         CancellationToken cancellationToken)
     {
@@ -60,11 +61,14 @@ public class TablesController : ControllerBase
         return Ok(table);
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("{id:long}")]
     [Authorize(Roles = Roles.Administrator)]
-    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult> Delete(
+        long id,
+        CancellationToken cancellationToken)
     {
         await _tableService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
+
 }

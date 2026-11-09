@@ -2,23 +2,29 @@ using RRMS.Application.DTOs.Tables;
 using RRMS.Application.Interfaces.Repositories;
 using RRMS.Application.Interfaces.Services;
 using RRMS.Domain.Entities;
+using RRMS.Application.Exceptions;
 
 namespace RRMS.Application.Services;
 
 public class TableService : ITableService
 {
     private readonly IRestaurantTableRepository _tableRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TableService(IRestaurantTableRepository tableRepository)
+    public TableService(
+        IRestaurantTableRepository tableRepository,
+        IUnitOfWork unitOfWork)
     {
         _tableRepository = tableRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    // TODO: return all restaurant tables (CRUD listing) — separate task.
-    public Task<IReadOnlyList<RestaurantTableResponse>> GetAllAsync(
+    public async Task<IReadOnlyList<RestaurantTableResponse>> GetAllAsync(
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException(
-            "TODO: return all restaurant tables mapped to RestaurantTableResponse.");
+    {
+        var tables = await _tableRepository.GetAllAsync(cancellationToken);
+        return tables.Select(Map).ToList();
+    }
 
     public async Task<IReadOnlyList<RestaurantTableResponse>> GetAvailableAsync(
         DateOnly? reservationDate,
@@ -47,25 +53,100 @@ public class TableService : ITableService
         return tables.Select(Map).ToList();
     }
 
-    // TODO: create/update/delete — separate task.
-    public Task<RestaurantTableResponse> CreateAsync(
+    public async Task<RestaurantTableResponse> CreateAsync(
         RestaurantTableRequest request,
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException(
-            "TODO: validate that the table number is not duplicated, create and save.");
+    {
+        ValidateRequest(request);
 
-    public Task<RestaurantTableResponse> UpdateAsync(
-        Guid id,
+        if (await _tableRepository.NumberExistsAsync(
+                request.Number, cancellationToken))
+        {
+            throw new ConflictException(
+                $"Table number {request.Number} already exists.");
+        }
+
+        var table = new RestaurantTable
+        {
+            Number = request.Number,
+            Capacity = request.Capacity,
+            IsActive = true
+        };
+
+        await _tableRepository.AddAsync(table, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Map(table);
+    }
+
+    public async Task<RestaurantTableResponse> UpdateAsync(
+        long id,
         RestaurantTableRequest request,
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException(
-            "TODO: update an existing restaurant table or throw a not-found error.");
+    {
+        ValidateRequest(request);
 
-    public Task DeleteAsync(
-        Guid id,
+        var table = await _tableRepository.GetByIdAsync(
+            id, cancellationToken);
+
+        if (table is null)
+        {
+            throw new NotFoundException(
+                 $"Table with ID {id} was not found.");
+        }
+
+        if (table.Number != request.Number &&
+            await _tableRepository.NumberExistsAsync(
+                request.Number, cancellationToken))
+        {
+            throw new ConflictException(
+                $"Table number {request.Number} already exists.");
+        }
+
+        table.Number = request.Number;
+        table.Capacity = request.Capacity;
+
+        _tableRepository.Update(table);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Map(table);
+    }
+
+    public async Task DeleteAsync(
+        long id,
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException(
-            "TODO: delete an existing restaurant table or throw a not-found error.");
+    {
+        var table = await _tableRepository.GetByIdAsync(
+            id, cancellationToken);
+
+        if (table is null)
+        {
+            throw new NotFoundException(
+                $"Table with ID {id} was not found.");
+        }
+
+        table.IsActive = false;
+
+        _tableRepository.Update(table);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void ValidateRequest(RestaurantTableRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Number is < 1 or > 10_000)
+        {
+            throw new ArgumentException(
+                "Table number must be between 1 and 10000.");
+        }
+
+        if (request.Capacity is < 1 or > 1_000)
+        {
+            throw new ArgumentException(
+                "Table capacity must be between 1 and 1000.");
+        }
+    }
 
     private static RestaurantTableResponse Map(RestaurantTable table)
         => new(
