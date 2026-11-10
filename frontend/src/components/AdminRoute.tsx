@@ -19,7 +19,7 @@ function AdminRoute({ children }: AdminRouteProps) {
       <section className="auth-section">
         <div className="auth-card auth-card--compact">
           <h1>Access denied</h1>
-          <p>Administrator access is required to manage the menu.</p>
+          <p>Administrator access is required to open this page.</p>
         </div>
       </section>
     )

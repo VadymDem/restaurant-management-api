@@ -17,7 +17,6 @@ function ReservationPage() {
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [guests, setGuests] = useState(2)
-  const [notes, setNotes] = useState('')
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
   const [tables, setTables] = useState<RestaurantTable[]>([])
   const [isLoadingTables, setIsLoadingTables] = useState(false)
@@ -107,7 +106,7 @@ function ReservationPage() {
         reservationDate: date,
         reservationTime: time,
         guestsCount: guests,
-        notes: notes.trim() || null,
+        notes: null,
       })
 
       navigate('/my-reservations', {
@@ -288,18 +287,6 @@ function ReservationPage() {
           </div>
 
           <div className="reservation-form__section reservation-form__section--final">
-            <label className="reservation-field reservation-field--notes">
-              <span>Special requests <small>Optional</small></span>
-              <textarea
-                maxLength={1000}
-                rows={4}
-                placeholder="Dietary requirements, celebration notes, or anything else we should know..."
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                disabled={isSubmitting}
-              />
-            </label>
-
             <aside className="reservation-summary" aria-label="Reservation summary">
               <p>Your reservation</p>
               <dl>

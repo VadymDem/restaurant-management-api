@@ -256,22 +256,6 @@
   font-size: 13px;
 }
 
-.my-reservation-card__notes {
-  margin: 18px 0 0;
-  padding: 12px 14px;
-  border-radius: 8px;
-  color: #665b53;
-  background: #f6f1ec;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.my-reservation-card__notes span {
-  margin-right: 5px;
-  color: #9d5421;
-  font-weight: 800;
-}
-
 .my-reservation-card__reference {
   position: absolute;
   right: 12px;

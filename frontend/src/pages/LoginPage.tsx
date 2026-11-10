@@ -90,7 +90,7 @@ const role =
         role === 'Administrator' ||
         (Array.isArray(role) && role.includes('Administrator'))
 
-      navigate(requestedPath ?? (isAdmin ? '/admin/menu' : '/reservations'), {
+      navigate(requestedPath ?? (isAdmin ? '/admin/reservations' : '/reservations'), {
         replace: true,
       })
     } catch (error) {

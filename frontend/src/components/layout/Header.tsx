@@ -67,8 +67,8 @@ function Header() {
                 My reservations
               </NavLink>
               {administrator && (
-                <NavLink to="/admin/menu" className={navLinkClass} onClick={closeMenu}>
-                  Manage menu
+                <NavLink to="/admin/reservations" className={navLinkClass} onClick={closeMenu}>
+                  Admin panel
                 </NavLink>
               )}
               <button className="navigation__logout" type="button" onClick={handleLogout}>

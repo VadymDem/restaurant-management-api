@@ -156,8 +156,7 @@
 }
 
 .reservation-field input,
-.reservation-field select,
-.reservation-field textarea {
+.reservation-field select {
   width: 100%;
   border: 1px solid #d8cec5;
   border-radius: 9px;
@@ -174,16 +173,8 @@
   padding: 11px 14px;
 }
 
-.reservation-field textarea {
-  min-height: 126px;
-  resize: vertical;
-  padding: 14px;
-  line-height: 1.55;
-}
-
 .reservation-field input:focus,
-.reservation-field select:focus,
-.reservation-field textarea:focus {
+.reservation-field select:focus {
   border-color: #a55b27;
   outline: 0;
   box-shadow: 0 0 0 4px rgba(165, 91, 39, 0.12);
@@ -319,14 +310,13 @@
 }
 
 .reservation-form__section--final {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(310px, 0.75fr);
-  align-items: start;
-  gap: 48px;
+  display: flex;
+  justify-content: flex-end;
   background: #f8f3ed;
 }
 
 .reservation-summary {
+  width: min(420px, 100%);
   padding: 26px;
   border-radius: 14px;
   color: #f8eee6;
@@ -417,9 +407,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .reservation-form__section--final {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 700px) {
@@ -455,9 +442,6 @@
     grid-template-columns: 1fr;
   }
 
-  .reservation-form__section--final {
-    gap: 28px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,6 +4,8 @@ import Layout from './components/layout/Layout'
 import AdminRoute from './components/AdminRoute'
 import AuthenticatedRoute from './components/AuthenticatedRoute'
 import AdminMenuPage from './pages/AdminMenuPage'
+import AdminReservationsPage from './pages/AdminReservationsPage'
+import AdminTablesPage from './pages/AdminTablesPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import MenuPage from './pages/MenuPage'
@@ -78,6 +80,28 @@ function App() {
           <Layout>
             <AdminRoute>
               <AdminMenuPage />
+            </AdminRoute>
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/admin/reservations"
+        element={
+          <Layout fullWidth>
+            <AdminRoute>
+              <AdminReservationsPage />
+            </AdminRoute>
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/admin/tables"
+        element={
+          <Layout fullWidth>
+            <AdminRoute>
+              <AdminTablesPage />
             </AdminRoute>
           </Layout>
         }
