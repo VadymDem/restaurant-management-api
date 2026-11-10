@@ -2,6 +2,7 @@ import type {
   Reservation,
   ReservationStatus,
   RestaurantTable,
+  RestaurantTableRequest,
 } from '../types/reservation'
 
 interface ApiProblemDetails {
@@ -90,4 +91,29 @@ export function updateAdminReservationStatus(
 
 export function getAdminTables(): Promise<RestaurantTable[]> {
   return adminRequest<RestaurantTable[]>('/api/Tables')
+}
+
+export function createAdminTable(
+  table: RestaurantTableRequest,
+): Promise<RestaurantTable> {
+  return adminRequest<RestaurantTable>('/api/Tables', {
+    method: 'POST',
+    body: JSON.stringify(table),
+  })
+}
+
+export function updateAdminTable(
+  tableId: number,
+  table: RestaurantTableRequest,
+): Promise<RestaurantTable> {
+  return adminRequest<RestaurantTable>(`/api/Tables/${tableId}`, {
+    method: 'PUT',
+    body: JSON.stringify(table),
+  })
+}
+
+export function deactivateAdminTable(tableId: number): Promise<void> {
+  return adminRequest<void>(`/api/Tables/${tableId}`, {
+    method: 'DELETE',
+  })
 }

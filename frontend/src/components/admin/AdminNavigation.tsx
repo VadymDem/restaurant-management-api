@@ -3,6 +3,7 @@ import './AdminNavigation.css'
 
 const links = [
   { to: '/admin/reservations', label: 'Reservations' },
+  { to: '/admin/tables', label: 'Tables' },
   { to: '/admin/menu', label: 'Menu' },
 ]
 

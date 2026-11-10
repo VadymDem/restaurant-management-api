@@ -12,6 +12,11 @@ export interface RestaurantTable {
   isActive: boolean
 }
 
+export interface RestaurantTableRequest {
+  number: number
+  capacity: number
+}
+
 export interface CreateReservationRequest {
   tableId: number
   reservationDate: string
