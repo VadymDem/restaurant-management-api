@@ -30,6 +30,10 @@
   box-shadow: 0 4px 16px rgb(0 0 0 / 5%);
 }
 
+.admin-menu > .admin-navigation {
+  margin-bottom: 8px;
+}
+
 .admin-menu__panel h2 {
   margin-top: 0;
   margin-bottom: 20px;

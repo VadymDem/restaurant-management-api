@@ -139,11 +139,6 @@ function MyReservationsPage() {
             )}
           </div>
 
-          {reservation.notes && (
-            <p className="my-reservation-card__notes">
-              <span>Note</span> {reservation.notes}
-            </p>
-          )}
         </div>
 
         <span className="my-reservation-card__reference">

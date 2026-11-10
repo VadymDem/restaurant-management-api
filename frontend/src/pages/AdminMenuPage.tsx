@@ -1,5 +1,6 @@
 ﻿
 import { useEffect, useState, type FormEvent } from 'react'
+import AdminNavigation from '../components/admin/AdminNavigation'
 import {
   createMenuItem,
   deleteMenuItem,
@@ -167,6 +168,8 @@ function AdminMenuPage() {
         <h1>Menu Management</h1>
         <p>Create, edit, and delete restaurant menu items.</p>
       </div>
+
+      <AdminNavigation />
 
       {error && (
         <p className="admin-menu__message admin-menu__message--error" role="alert">
