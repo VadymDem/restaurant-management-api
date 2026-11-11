@@ -43,7 +43,7 @@ RRMS.Api ──► RRMS.Application ──► RRMS.Domain
 Core entities and shared constants. No external dependencies.
 
 - `Entities/` — `User`, `RestaurantTable`, `Reservation`, `MenuItem`
-- `Enums/` — `UserRole` (Customer / Administrator), `ReservationStatus` (Pending / Confirmed / Cancelled)
+- `Enums/` — `UserRole` (Customer / Administrator), `ReservationStatus` (Pending / Confirmed / Cancelled / Completed)
 - `Constants/` — `Roles` string constants for `[Authorize]` attributes
 
 ### RRMS.Application
@@ -53,7 +53,7 @@ Contracts between API and Infrastructure layers.
 - `DTOs/` — request/response records grouped by domain (`Auth/`, `Menu/`, `Tables/`, `Reservations/`)
 - `Interfaces/Repositories/` — `IUserRepository`, `IMenuItemRepository`, `IRestaurantTableRepository`, `IReservationRepository`, `IUnitOfWork`
 - `Interfaces/Services/` — `IAuthService`, `IMenuService`, `ITableService`, `IReservationService`, `IJwtTokenService`
-- `Services/` — `AuthService` (login), `MenuService` (menu CRUD), others throw `NotImplementedException`
+- `Services/` — `AuthService` (registration/login), `MenuService` (menu CRUD), `TableService` (table management and availability), `ReservationService` (creation, own reservations, admin status management; customer cancellation is not implemented)
 - `Options/JwtOptions.cs` — JWT configuration model
 - `Exceptions/` — `DomainException` and derived errors (404/401/409) mapped to ProblemDetails by middleware
 - `DependencyInjection.cs` — `AddApplication()` extension method
@@ -99,27 +99,30 @@ Web API layer (entry point).
 | GET     | `/api/tables/available`          | Authenticated   | Get available tables (optional `date`, `time`, `guests`) |
 | POST    | `/api/tables`                    | Administrator   | Create a table                   |
 | PUT     | `/api/tables/{id}`               | Administrator   | Update a table                   |
-| DELETE  | `/api/tables/{id}`               | Administrator   | Delete a table                   |
+| DELETE  | `/api/tables/{id}`               | Administrator   | Deactivate a table (soft delete)  |
 | POST    | `/api/reservations`              | Authenticated   | Create reservation               |
 | GET     | `/api/reservations/my`           | Authenticated   | Get own reservations             |
-| DELETE  | `/api/reservations/{id}`         | Reservation owner| Cancel reservation               |
+| DELETE  | `/api/reservations/{id}`         | Reservation owner| Cancel reservation (NOT IMPLEMENTED) |
 | GET     | `/api/admin/reservations`        | Administrator   | Get all reservations             |
 | PUT     | `/api/admin/reservations/{id}/status` | Administrator | Update reservation status     |
 
 ## Reservation Statuses
 
-Statuses are exchanged as strings (`Pending`, `Confirmed`, `Cancelled`) both in requests and responses.
+Statuses are exchanged as strings (`Pending`, `Confirmed`, `Cancelled`, `Completed`) in API requests and responses.
 
 - `Pending` — initial state after creation
 - `Confirmed` — set by administrator
-- `Cancelled` — set by administrator or by the reservation owner
+- `Cancelled` — may be set by an administrator; customer cancellation is not implemented.
+- `Completed` — terminal status set by an administrator
 
 ## Getting Started
 
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- A Supabase project (for PostgreSQL connection string)
+- Node.js and npm compatible with the checked-in Vite 8 toolchain (check `frontend/package.json` and package engine requirements)
+- A PostgreSQL instance (the project uses Supabase PostgreSQL)
+- Network access to the configured PostgreSQL instance
 
 ### Setup
 
@@ -139,7 +142,7 @@ dotnet test RRMS.slnx
 dotnet run --project src/RRMS.Api
 ```
 
-Open `https://localhost:<port>/swagger` to explore the API via Swagger UI (use **Authorize** with a token from `POST /api/auth/login`).
+In the Development environment, open the Swagger UI at `<backend-base-url>/swagger` (where `<backend-base-url>` is the URL printed by `dotnet run`). Use **Authorize** with the JWT returned by `POST /api/auth/login`. Swagger UI is enabled only in Development.
 
 ### Environment Variables
 
@@ -209,15 +212,13 @@ dotnet user-secrets set "AdminSeed:Email" "admin@example.com" --project src/RRMS
 dotnet user-secrets set "AdminSeed:Password" "<strong-password>" --project src/RRMS.Api
 ```
 
-### Database Migrations
+### Database preparation
 
-```bash
-# create a migration (run from solution root)
-dotnet ef migrations add InitialCreate --project src/RRMS.Infrastructure --startup-project src/RRMS.Api
+The repository includes `db/schema.sql`, which documents the project's PostgreSQL schema. The ZIP does not include a checked-in EF Core `Migrations/` directory. **Do not assume `dotnet ef database update` will create the necessary tables in a new database.**
 
-# apply migrations
-dotnet ef database update --project src/RRMS.Infrastructure --startup-project src/RRMS.Api
-```
+For a fresh, isolated development database, inspect `db/schema.sql` before applying it and use an authorized PostgreSQL client to execute the reviewed schema. **Never reapply a schema blindly to an existing database containing data.** Verify the schema, PostgreSQL connection settings, and seed behavior before starting the application. The application invokes `DbSeeder.SeedAsync` during startup; it does not automatically run EF Core migrations.
+
+If the team later introduces tracked EF Core migrations, document the approved migration and rollback procedure here. Backup and restoration procedures must be tested separately for handover.
 
 ## NuGet Packages
 
@@ -234,20 +235,53 @@ dotnet ef database update --project src/RRMS.Infrastructure --startup-project sr
 | RRMS.Infrastructure | `Microsoft.EntityFrameworkCore`             | EF Core runtime         |
 | RRMS.Infrastructure | `Microsoft.Extensions.Configuration.Abstractions` | Configuration access |
 
-## Status
+## Frontend (React + TypeScript + Vite)
 
-Stage 2 completed:
+The frontend source is in `frontend/`. It includes registration, login, menu browsing, reservation creation, personal reservations, and administrator pages for menu, tables, and reservations.
 
-- `POST /api/auth/login` — verifies credentials with BCrypt and issues a signed JWT.
-- JWT bearer authentication configured (`AddJwtBearer`, issuer/audience/signing-key validation).
-- Swagger UI with Bearer security scheme; SwaggerUI is only enabled in Development.
-- Centralized `ExceptionHandlingMiddleware` — domain errors map to proper HTTP statuses (404/401/409), unexpected exceptions to 500.
-- Startup seeding of the default Administrator account.
+Run the backend first and note its actual base URL. From the repository root:
 
-Stage 3 (menu) completed:
+```bash
+cd frontend
+npm ci
+```
 
-- Menu CRUD at `/api/menu` backed by the `MenuItems` table (`GET` anonymous, writes administrator-only).
-- Price validation: `0.01`–`1000000` with at most two decimal places (matches `NUMERIC(10,2)`).
-- xUnit unit tests (`tests/RRMS.Application.Tests`) and GitHub Actions CI (`.github/workflows/ci.yml`).
+Create `frontend/.env` from `frontend/.env.example` and set `VITE_API_BASE_URL` to the running backend's origin, such as `http://localhost:5214` **only if the API actually runs on that URL**. Keep the frontend origin allowed in the backend `Cors:AllowedOrigins` configuration.
 
-Remaining (`NotImplementedException`): `POST /api/auth/register` and the table/reservation endpoints, plus EF Core migrations.
+```bash
+npm run dev
+npm run build
+npm run lint
+```
+
+`npm run dev` starts the development server; open the URL printed by Vite. `npm run build` runs TypeScript checks and creates a production bundle. `npm run lint` runs ESLint. There is no frontend unit-test script in the supplied `frontend/package.json`.
+
+## Continuous Integration
+
+The workflow `.github/workflows/ci.yml` is triggered on pushes and pull requests targeting `main` and executes .NET 10 restore, Release build, and backend tests. It does **not** currently run frontend lint or frontend build. Verify results in GitHub Actions; the existence of the workflow is not a guarantee that the latest run passed.
+
+## Features and implementation status (ZIP snapshot: 10 November 2026)
+
+| Module | Status |
+|---|---|
+| Customer registration and JWT login | Implemented |
+| Public menu browsing and administrator menu CRUD | Implemented |
+| Table browsing and availability filtering | Implemented |
+| Administrator table create/update/deactivation | Implemented |
+| Customer reservation creation and `GET /my` | Implemented |
+| Administrator reservation listing and status transitions | Implemented |
+| Customer `DELETE /api/reservations/{id}` | **Not implemented** (`ReservationService.CancelAsync` throws `NotImplementedException`) |
+
+### Known limitations
+
+- Customer cancellation is exposed as an API route but is not functional. The unimplemented service operation may produce HTTP 500 rather than a successful cancellation. Track it as an open defect; do not mark it as tested or delivered.
+- Reservation availability protects the same table/date/start-time slot. It does not check arbitrary overlapping time intervals with different starting times.
+- Table deletion is a **soft delete** (`IsActive = false`); there is no dedicated reactivation endpoint in the supplied code.
+- Database creation/upgrade and backup restoration are not provided as a fully automated, verified release procedure in this repository snapshot.
+- Frontend build/lint is not part of the currently checked-in GitHub Actions workflow.
+
+## Project documentation and handover
+
+Keep documentation and evidence in the team's Confluence space and Jira project. Relevant tasks: SCRUM-48 (documentation), SCRUM-49 (regression testing), SCRUM-50 (final bug/test summary). Archive test runs, source revision or release tag, known limitations, ownership, access-granting instructions (never share passwords), and an independently performed setup/verification walkthrough before handover.
+
+Repository: https://github.com/VadymDem/restaurant-management-api
