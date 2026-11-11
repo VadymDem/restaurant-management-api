@@ -448,4 +448,36 @@ public class ReservationServiceTests
             return Task.FromResult(1);
         }
     }
+
+    [Theory]
+    [InlineData(2026, 1, 15, 22, 30)]
+    [InlineData(2026, 7, 15, 21, 30)]
+    public async Task CreateAsync_KyivTimeZone_RejectsPastLocalDate(
+        int year, int month, int day, int utcHour, int utcMinute)
+    {
+        var utcNow = new DateTimeOffset(
+            year, month, day, utcHour, utcMinute, 0,
+            TimeSpan.Zero);
+
+        var service = new ReservationService(
+            _reservations,
+            _tables,
+            _unitOfWork,
+            new FixedTimeProvider(utcNow),
+            MsOptions.Create(new RestaurantOptions
+            {
+                TimeZone = "Europe/Kyiv"
+            }));
+
+        var request = new CreateReservationRequest(
+            1,
+            new DateOnly(year, month, day),
+            new TimeOnly(23, 0),
+            2,
+            null);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync(_userId, request));
+    }
+
 }
