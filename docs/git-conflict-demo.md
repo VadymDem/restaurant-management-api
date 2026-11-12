@@ -1,1 +1,1 @@
-Reservation rule: validate booking time using the Europe/Kyiv timezone.
+Reservation rule: validate booking time using the Europe/Kyiv timezone and prevent overlapping reservations.
